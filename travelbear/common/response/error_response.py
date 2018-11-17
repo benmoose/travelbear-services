@@ -2,7 +2,8 @@ from django.http import JsonResponse
 
 
 def error_response(status=400, message=None):
-    data = None
+    data = {'error': True}
     if message is not None:
-        data = dict(message=message)
+        data.update(message=message)
+
     return JsonResponse(data, status=status)
