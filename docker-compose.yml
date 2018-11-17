@@ -6,9 +6,8 @@ services:
 
   server:
     build: .
+    command: python travelbear/manage.py runserver 0.0.0.0:8000
     depends_on:
       - db
     ports:
-      - 8000:8000
-    volumes:
-      - .:/usr/src/app
+      - "8000:8000"
