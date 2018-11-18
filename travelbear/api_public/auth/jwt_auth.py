@@ -1,5 +1,4 @@
 import functools
-import os
 from pathlib import Path
 
 import jwt
@@ -21,9 +20,11 @@ def require_jwt_auth(func):
         token = get_token_from_authorization_header(auth_header)
         try:
             claims = decode_token(token)
+            request.user = claims['sub']
         except Exception:
             request.user = None
-        request.user = claims['sub']
+        return func(request, *args, **kwargs)
+    return wrapper
 
 
 def decode_token(token):
@@ -33,7 +34,7 @@ def decode_token(token):
 
 def get_jwt_public_key():
     """
-    TODO(Ben): Make this less hacky
+    TODO(Ben): Find a home for the public key
     >>> type(get_jwt_public_key()) == str
     True
     """
