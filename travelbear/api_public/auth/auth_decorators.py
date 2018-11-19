@@ -1,4 +1,5 @@
 import functools
+import logging
 from pathlib import Path
 
 from cryptography.x509 import load_pem_x509_certificate
@@ -9,6 +10,8 @@ from jwt.exceptions import InvalidTokenError
 
 from common.request import get_authorization_header
 
+
+logger = logging.getLogger(__name__)
 
 CERTIFICATE_NAME = 'travel-bear.pem'
 CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
@@ -32,6 +35,9 @@ def require_jwt_auth(_func=None, *, public_key=None):
                 claims = decode(token, public_key, algorithms='RS256')
                 request.user = claims['sub']
             except InvalidTokenError:
+                return HttpResponse(status=401)
+            except KeyError:
+                logger.warning('Got JWT with no sub claim: %s', token)
                 return HttpResponse(status=401)
             return func(request, *args, **kwargs)
 
