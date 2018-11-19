@@ -13,9 +13,11 @@ test_public_key = test_private_key.public_key()
 
 
 def make_jwt_token(sub='test-sub', valid=True):
-    if valid:
-        return jwt.encode({'sub': sub}, test_private_key, algorithm='RS256')
-    return jwt.encode({'sub': sub}, test_private_key, algorithm='RS256', headers={'exp': 1000})
+    payload = {'sub': sub}
+    algorithm = 'RS256'
+    if not valid:
+        return jwt.encode(payload, test_private_key, algorithm=algorithm, headers={'exp': 1000})  # exp in past
+    return jwt.encode(payload, test_private_key, algorithm=algorithm)
 
 
 @pytest.fixture
