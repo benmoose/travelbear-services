@@ -13,7 +13,7 @@ from common.request import get_authorization_header
 
 logger = logging.getLogger(__name__)
 
-CERTIFICATE_NAME = 'travel-bear.pem'
+CERTIFICATE_NAME = "travel-bear.pem"
 CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
 
@@ -39,12 +39,12 @@ def require_jwt_auth(_func=None, *, public_key=None):
             token = get_token_from_authorization_header(auth_header)
 
             try:
-                claims = decode(token, public_key, algorithms='RS256')
-                request.user = claims['sub']
+                claims = decode(token, public_key, algorithms="RS256")
+                request.user = claims["sub"]
             except InvalidTokenError:
                 return HttpResponse(status=401)
             except KeyError:
-                logger.warning('Got JWT with no sub claim: %s', token)
+                logger.warning("Got JWT with no sub claim: %s", token)
                 return HttpResponse(status=401)
             return func(request, *args, **kwargs)
 
@@ -78,7 +78,7 @@ def get_token_from_authorization_header(authorization_header):
     True
     """
     try:
-        bearer, token = authorization_header.split(':')
+        bearer, token = authorization_header.split(":")
         token = token.strip()
         return token if len(token) > 0 else None
     except ValueError:

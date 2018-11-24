@@ -1,4 +1,4 @@
-AUTHORIZATION_HEADER_NAME = 'Authorization'
+AUTHORIZATION_HEADER_NAME = "Authorization"
 
 
 def get_authorization_header(request):
@@ -12,4 +12,4 @@ def get_meta_key_name(header_name):
     >>> get_meta_key_name('foo')
     'HTTP_FOO'
     """
-    return f'HTTP_{header_name.upper()}'
+    return f"HTTP_{header_name.upper()}"

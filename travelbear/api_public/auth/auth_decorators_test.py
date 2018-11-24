@@ -12,11 +12,13 @@ test_private_key = generate_private_key(65537, 2048, default_backend())
 test_public_key = test_private_key.public_key()
 
 
-def make_jwt_token(sub='test-sub', valid=True):
-    payload = {'sub': sub}
-    algorithm = 'RS256'
+def make_jwt_token(sub="test-sub", valid=True):
+    payload = {"sub": sub}
+    algorithm = "RS256"
     if not valid:
-        return jwt.encode(payload, test_private_key, algorithm=algorithm, headers={'exp': 1000})  # exp in past
+        return jwt.encode(
+            payload, test_private_key, algorithm=algorithm, headers={"exp": 1000}
+        )  # exp in past
     return jwt.encode(payload, test_private_key, algorithm=algorithm)
 
 
@@ -31,22 +33,20 @@ def protected_endpoint(request, expected_user=None):
     return HttpResponse()
 
 
-@pytest.mark.parametrize('authorization', (
-    '',
-    'foo',
-    'Bearer: foo',
-    f'Bearer: {make_jwt_token(valid=False)}',
-))
+@pytest.mark.parametrize(
+    "authorization",
+    ("", "foo", "Bearer: foo", f"Bearer: {make_jwt_token(valid=False)}"),
+)
 def test_require_jwt_auth_not_authenticated(request_factory, authorization):
-    request = request_factory.get('/', HTTP_AUTHORIZATION=authorization)
+    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
     response = protected_endpoint(request)
     assert response.status_code == 401
 
 
 def test_require_jwt_auth_authenticated(request_factory):
-    token = make_jwt_token(sub='test-sub')
-    authorization = f'Bearer: {token.decode()}'
+    token = make_jwt_token(sub="test-sub")
+    authorization = f"Bearer: {token.decode()}"
 
-    request = request_factory.get('/', HTTP_AUTHORIZATION=authorization)
-    result = protected_endpoint(request, expected_user='test-sub')
+    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
+    result = protected_endpoint(request, expected_user="test-sub")
     assert result.status_code == 200

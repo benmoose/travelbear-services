@@ -16,7 +16,11 @@ class Event(ModelBase):
     lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     approx_display_address = models.TextField()
-    approx_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    approx_lng = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    approx_lat = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
+    approx_lng = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
 
     protect_real_address = models.BooleanField(default=True)

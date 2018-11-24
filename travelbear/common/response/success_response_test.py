@@ -6,11 +6,9 @@ from django.http import HttpResponse
 from .success_response import success_response, ResponseError
 
 
-@pytest.mark.parametrize('status,data', (
-    (200, None),
-    (201, 'Created!'),
-    (201, {'ids': [1, 2, 4, 5]}),
-))
+@pytest.mark.parametrize(
+    "status,data", ((200, None), (201, "Created!"), (201, {"ids": [1, 2, 4, 5]}))
+)
 def test_success_response(status, data):
     response = success_response(status=status, data=data)
 
