@@ -18,6 +18,13 @@ CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
 
 def require_jwt_auth(_func=None, *, public_key=None):
+    """
+    This rejects requests without a valid JWT token in the authorization header.
+    If invalid:
+     - return HTTP 401
+    If valid:
+     - Populate request.user with the JWT's sub claim
+    """
     if public_key is None:
         public_key = get_public_key_from_certificate_file()
 
