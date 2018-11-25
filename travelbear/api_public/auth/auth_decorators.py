@@ -4,6 +4,7 @@ from pathlib import Path
 
 from cryptography.x509 import load_pem_x509_certificate
 from cryptography.hazmat.backends import default_backend
+from django.conf import settings
 from django.http import HttpResponse
 from jwt import decode
 from jwt.exceptions import InvalidTokenError
@@ -17,7 +18,7 @@ CERTIFICATE_NAME = "travel-bear.pem"
 CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
 
-def require_jwt_auth(_func=None, *, public_key=None):
+def require_jwt_auth(_func=None, *, public_key=None, mock_test_sub=None):
     """
     This rejects requests without a valid JWT token in the authorization header.
     If invalid:
@@ -31,6 +32,10 @@ def require_jwt_auth(_func=None, *, public_key=None):
     def decorator_require_jwt_auth(func):
         @functools.wraps(func)
         def wrapper(request, *args, **kwargs):
+            if settings.IS_TEST_ENVIRONMENT and mock_test_sub:
+                request.user = mock_test_sub
+                return func(request, *args, **kwargs)
+
             auth_header = get_authorization_header(request)
 
             if auth_header is None:

@@ -16,10 +16,16 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+STACK = os.getenv("stack")
+
+IS_TEST_ENVIRONMENT = STACK == "test"
+
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+
+JWT_AUTH_PUBLIC_KEY = None
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
