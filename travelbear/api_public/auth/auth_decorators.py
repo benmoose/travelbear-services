@@ -17,24 +17,22 @@ logger = logging.getLogger(__name__)
 CERTIFICATE_NAME = "travel-bear.pem"
 CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
+TEST_ENVIRONMENT_MOCK_SUB_HEADER = "HTTP_MOCK_USER_SUB"
 
-def require_jwt_auth(_func=None, *, public_key=None, mock_test_sub=None):
-    """
-    This rejects requests without a valid JWT token in the authorization header.
-    If invalid:
-     - return HTTP 401
-    If valid:
-     - Populate request.user with the JWT's sub claim
-    """
+
+def require_jwt_auth(_func=None, *, public_key=None):
     if public_key is None:
         public_key = get_public_key_from_certificate_file()
 
     def decorator_require_jwt_auth(func):
         @functools.wraps(func)
         def wrapper(request, *args, **kwargs):
-            if settings.IS_TEST_ENVIRONMENT and mock_test_sub:
-                request.user = mock_test_sub
-                return func(request, *args, **kwargs)
+            # if test env and mock header set, skip JWT check
+            if settings.IS_TEST_ENVIRONMENT:
+                mock_user_sub = request.META.get(TEST_ENVIRONMENT_MOCK_SUB_HEADER)
+                if mock_user_sub is not None:
+                    request.user = mock_user_sub
+                    return func(request, *args, **kwargs)
 
             auth_header = get_authorization_header(request)
 
