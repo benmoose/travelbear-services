@@ -1,0 +1,34 @@
+# Python CircleCI 2.0 configuration file
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/tb
+    docker:
+    - image: circleci/python:3.7
+
+    steps:
+    - checkout
+    - setup_remote_docker
+    - run:
+        name: Build images
+        command: |
+          docker-compose build
+    - run:
+        name: Start services
+        command: |
+          docker-compose up -d
+    - run:
+        name: Run tests
+        command: |
+          docker-compose exec -e DB_HOST=db server \
+          pytest --doctest-modules -W ignore::DeprecationWarning travelbear
+    - run:
+        name: Run linter
+        command: |
+          docker-compose exec server \
+          black --fast --check --exclude db_layer/migrations travelbear
+    - store_test_results:
+        path: test-results
