@@ -1,1 +1,1 @@
-from .api_model import APIModel, api_model
+from .api_model import api_model

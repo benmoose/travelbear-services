@@ -1,46 +1,67 @@
 import attr
-import typing
 
 
 def api_model(cls):
-    default_attribute_value = attr.ib(default=None)
+    """
+    API Model decorator for representing input from external sources.
+    It is primarily responsible for
+     - encoding incoming data in a class (for easy use in application code)
+     - providing methods to check the validity of data.
+
+    To activate validity checking, classes using this decorator should add the `get_validation_errors`
+    method.
+    """
+    if not hasattr(cls, "from_dict"):
+        cls.from_dict = classmethod(api_model_from_dict)
+
+    if not hasattr(cls, "to_dict"):
+        cls.to_dict = api_model_to_dict
+
+    if not hasattr(cls, "get_validation_errors"):
+        cls.get_validation_errors = lambda: []
+
+    if not hasattr(cls, "is_valid"):
+        cls.is_valid = property(api_model_is_valid)
+
+    cls.__attrs_post_init__ = api_model_set_validation_errors
+
+    cls.__api_model__ = True
+
     return attr.s(
-        cls, these={slot: default_attribute_value for slot in cls.__slots__}, slots=True
+        cls,
+        these=api_model_get_ib_fields(cls.__slots__),
+        slots=True,
+        weakref_slot=False,
     )
 
 
-@attr.s(auto_attribs=True)
-class APIModel:
-    """
-    Base class for serialising request data into a more useful form.
+def api_model_set_validation_errors(self):
+    self.validation_errors = self.get_validation_errors()
 
-    Subclasses must define `get_validation_errors`, which should return
-    a list of validation errors, or an empty list if there are none.
-    """
 
-    validation_errors: typing.List[str] = attr.ib(factory=list, init=False, repr=False)
+def api_model_get_ib_fields(fields):
+    mapping = {field: attr.ib(default=None) for field in fields}
+    mapping['validation_errors'] = attr.ib(factory=list, repr=False)
+    return mapping
 
-    def __attrs_post_init__(self):
-        self.validation_errors = self._get_validation_errors()
 
-    def _get_validation_errors(self):
-        validation_errors = self.get_validation_errors()
-        if not isinstance(validation_errors, list):
-            raise RuntimeError(
-                f"get_validation_errors must return a list, got {type(validation_errors)}"
-            )
-        return validation_errors
+def api_model_to_dict(self, keep_empty_fields=False):
+    return attr.asdict(self, filter=lambda k, v: _filter_attributes(k, v, keep_empty_fields))
 
-    def to_dict(self):
-        return attr.asdict(self)
 
-    @property
-    def is_valid(self):
-        return not bool(self.validation_errors)
+def api_model_from_dict(cls, data):
+    instance = cls()
+    for attribute in cls.__slots__:
+        value = data.get(attribute)
+        setattr(instance, attribute, value)
+    return instance
 
-    @classmethod
-    def from_dict(cls, data):
-        raise NotImplementedError
 
-    def get_validation_errors(self):
-        raise NotImplementedError
+def api_model_is_valid(self):
+    return not bool(self.validation_errors)
+
+
+def _filter_attributes(attribute, value, keep_empty_keys):
+    pass_key = attribute.repr
+    pass_value = keep_empty_keys or value is not None
+    return pass_key and pass_value

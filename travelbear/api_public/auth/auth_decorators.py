@@ -43,7 +43,7 @@ def require_jwt_auth(_func=None, *, public_key=None):
 
             try:
                 claims = decode(token, public_key, algorithms="RS256")
-                request.user = claims["sub"]
+                setattr(request, "user_id", claims["sub"])
             except InvalidTokenError:
                 return HttpResponse(status=401)
             except KeyError:

@@ -1,9 +1,9 @@
-from common.model import APIModel, api_model
+from common.model import api_model
 from common.parse import safe_parse_rfc_3339
 
 
 @api_model
-class Event(APIModel):
+class Event:
     __slots__ = ("title", "description", "start_time", "end_time", "max_guests")
 
     @classmethod
@@ -24,4 +24,6 @@ class Event(APIModel):
             value = getattr(self, field)
             if value is None:
                 errors.append(f"{field} is required")
+        if isinstance(self.max_guests, int) and self.max_guests < 0:
+            errors.append('max_guests must be a positive integer')
         return errors

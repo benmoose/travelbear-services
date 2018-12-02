@@ -19,5 +19,5 @@ def test_create_event(user):
 
     event_in_db = Event.objects.all()[0]
     assert event == event_in_db
-    assert event.created_by == event_in_db.created_by
+    assert event.created_by == event_in_db.created_by  # only compares pk
     assert event.title == event_in_db.title
