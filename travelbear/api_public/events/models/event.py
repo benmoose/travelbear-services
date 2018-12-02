@@ -25,5 +25,5 @@ class Event:
             if value is None:
                 errors.append(f"{field} is required")
         if isinstance(self.max_guests, int) and self.max_guests < 0:
-            errors.append('max_guests must be a positive integer')
+            errors.append("max_guests must be a positive integer")
         return errors

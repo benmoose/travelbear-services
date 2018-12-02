@@ -41,12 +41,14 @@ def api_model_set_validation_errors(self):
 
 def api_model_get_ib_fields(fields):
     mapping = {field: attr.ib(default=None) for field in fields}
-    mapping['validation_errors'] = attr.ib(factory=list, repr=False)
+    mapping["validation_errors"] = attr.ib(factory=list, repr=False)
     return mapping
 
 
 def api_model_to_dict(self, keep_empty_fields=False):
-    return attr.asdict(self, filter=lambda k, v: _filter_attributes(k, v, keep_empty_fields))
+    return attr.asdict(
+        self, filter=lambda k, v: _filter_attributes(k, v, keep_empty_fields)
+    )
 
 
 def api_model_from_dict(cls, data):

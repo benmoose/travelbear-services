@@ -5,12 +5,12 @@ from django.urls import reverse
 
 from db_layer.event import create_event
 from db_layer.user import get_or_create_user
-from .list_events import list_events
+from .list_events import list_upcoming_events
 
 
 @pytest.fixture
 def call_list_endpoint():
-    url = reverse(list_events)
+    url = reverse(list_upcoming_events)
     client = Client()
 
     def _call_list_endpoint(user_id=None, data=None):
@@ -21,23 +21,21 @@ def call_list_endpoint():
 
 @pytest.fixture
 def user_1():
-    user, _ = get_or_create_user('auth0-id-1', 'user1@test.com')
+    user, _ = get_or_create_user("auth0-id-1", "user1@test.com")
     return user
 
 
 @pytest.fixture
 def user_2():
-    user, _ = get_or_create_user('auth0-id-2', 'user2@test.com')
+    user, _ = get_or_create_user("auth0-id-2", "user2@test.com")
     return user
 
 
 @pytest.fixture
 def create_event_for_user():
     def _create_event_for_user(user):
-        return create_event(
-            created_by=user,
-            title='title',
-        )
+        return create_event(created_by=user, title="title")
+
     return _create_event_for_user
 
 
@@ -47,5 +45,5 @@ def test_list_events(call_list_endpoint, user_1, user_2, create_event_for_user):
     user_2_event = create_event_for_user(user_2)
 
     response = call_list_endpoint(user_id=user_1.auth0_id)
+    print(response.content)
     assert response.status_code == 200
-    # check correct events returned
