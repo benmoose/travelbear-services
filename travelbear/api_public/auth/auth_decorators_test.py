@@ -54,6 +54,16 @@ def test_require_jwt_auth_not_authenticated(request_factory, authorization):
 
 
 @pytest.mark.django_db
+def test_require_jwt_auth_authenticated_unknown_user(request_factory, create_user):
+    token = make_jwt_token(sub="test-sub")
+    authorization = f"Bearer: {token.decode()}"
+
+    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
+    result = protected_endpoint(request)
+    assert result.status_code == 404
+
+
+@pytest.mark.django_db
 def test_require_jwt_auth_authenticated(request_factory, create_user):
     user = create_user(external_id="test-sub")
     token = make_jwt_token(sub="test-sub")

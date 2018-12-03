@@ -14,7 +14,6 @@ def count_events_in_db():
 
 @pytest.fixture
 def api_client():
-    get_or_create_user(external_id="foo")
     return Client(HTTP_MOCK_USER_SUB="foo")
 
 
@@ -25,6 +24,8 @@ def endpoint_url():
 
 @pytest.mark.django_db
 def test_create_event_bad_request(api_client, endpoint_url):
+    get_or_create_user(external_id="foo")
+
     assert 0 == count_events_in_db()
     response = api_client.post(endpoint_url, data={"title": 0, "max_guests": "3.6"})
     assert response.status_code == 400
@@ -33,6 +34,8 @@ def test_create_event_bad_request(api_client, endpoint_url):
 
 @pytest.mark.django_db
 def test_create_event(api_client, endpoint_url):
+    get_or_create_user(external_id="foo")
+
     assert 0 == count_events_in_db()
     response = api_client.post(
         endpoint_url,
