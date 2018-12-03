@@ -45,7 +45,7 @@ def api_model(cls):
 def api_model_post_init(self):
     self.validation_errors = self.get_validation_errors()
     if hasattr(self, "__post_init__"):
-        self.__post_init__(self)
+        self.__post_init__()
 
 
 def api_model_get_ib_fields(fields):

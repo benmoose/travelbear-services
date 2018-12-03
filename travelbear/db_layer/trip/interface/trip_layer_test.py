@@ -35,10 +35,14 @@ def test_create_trip(create_user):
 @pytest.mark.django_db
 def test_delete_trip(create_user):
     user = create_user("test-user")
+    someone_else = create_user("someone-else")
+
     trip = create_trip(user, title="test trip")
     assert not trip.is_deleted
 
-    returned_trip = delete_trip(trip)
+    assert delete_trip(someone_else, trip) is None
+
+    returned_trip = delete_trip(user, trip)
 
     assert returned_trip.pk == trip.pk
     assert returned_trip.is_deleted
@@ -76,8 +80,11 @@ def test_get_trip_by_id(django_assert_num_queries, create_user):
     location = create_location(trip, "location", lat=4, lng=2)
 
     with django_assert_num_queries(2):
-        trip = get_trip_by_id(trip.trip_id)
+        trip = get_trip_by_id(user, trip.trip_id)
         assert trip.title == "test trip"
         assert trip.locations == [location]
 
-    assert get_trip_by_id(uuid4()) is None
+    assert get_trip_by_id(user, uuid4()) is None
+
+    someone_else = create_user("someone-else")
+    assert get_trip_by_id(someone_else, uuid4()) is None

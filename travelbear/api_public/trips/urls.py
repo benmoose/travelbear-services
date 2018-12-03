@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import create_trip, list_trips
+from .views import create_trip, list_trips, get_trip
 
 
 def root(request):
@@ -10,4 +10,7 @@ def root(request):
         return create_trip.create_trip_handler(request)
 
 
-urlpatterns = [path("", root)]
+urlpatterns = [
+    path("", root),
+    path("/<trip_id>", get_trip.get_trip_handler),
+]
