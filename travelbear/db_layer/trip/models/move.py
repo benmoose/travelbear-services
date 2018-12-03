@@ -10,9 +10,15 @@ class Move(ModelBase):
         default=uuid4, unique=True, db_index=True, editable=False
     )
 
-    from_location = models.ForeignKey(Location, on_delete=models.PROTECT, related_name="start_location")
-    to_location = models.ForeignKey(Location, on_delete=models.PROTECT, related_name="end_location")
+    from_location = models.ForeignKey(
+        Location, on_delete=models.PROTECT, related_name="start_location"
+    )
+    to_location = models.ForeignKey(
+        Location, on_delete=models.PROTECT, related_name="end_location"
+    )
 
     type = models.CharField(max_length=255, blank=True)
     depart_time = models.DateTimeField(blank=True, null=True)
     arrive_time = models.DateTimeField(blank=True, null=True)
+
+    is_deleted = models.BooleanField(default=False)

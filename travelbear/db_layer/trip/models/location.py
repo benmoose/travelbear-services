@@ -17,3 +17,5 @@ class Location(ModelBase):
     lng = models.DecimalField(max_digits=9, decimal_places=6)
 
     google_place_id = models.CharField(max_length=255, blank=True)
+
+    is_deleted = models.BooleanField(default=False)
