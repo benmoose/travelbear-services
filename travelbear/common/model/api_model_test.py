@@ -66,7 +66,11 @@ def test_is_valid(model):
     assert model(5, 5).validation_errors == ["foo and bar cannot sum to 10"]
 
     assert not model.from_dict({"foo": 5, "bar": 5}).is_valid
-    assert model.from_dict({"foo": 5, "bar": 5}).validation_errors == ["foo and bar cannot sum to 10"]
+    assert model.from_dict({"foo": 5, "bar": 5}).validation_errors == [
+        "foo and bar cannot sum to 10"
+    ]
 
     assert not model.from_db_model(model(5, 5)).is_valid
-    assert model.from_db_model(model(5, 5)).validation_errors == ["foo and bar cannot sum to 10"]
+    assert model.from_db_model(model(5, 5)).validation_errors == [
+        "foo and bar cannot sum to 10"
+    ]

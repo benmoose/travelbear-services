@@ -22,11 +22,11 @@ class Event:
 
     @classmethod
     def from_dict(cls, data):
-        print('b', data)
+        print("b", data)
         data["max_guests"] = safe_parse_int(data.get("max_guests"))
         data["start_time"] = safe_parse_rfc_3339(data.get("start_time"))
         data["end_time"] = safe_parse_rfc_3339(data.get("end_time"))
-        print('a', data)
+        print("a", data)
         return cls._from_dict(data)
 
     def get_validation_errors(self):

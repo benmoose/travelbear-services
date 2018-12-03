@@ -19,7 +19,11 @@ def call_list_endpoint():
     def _call_list_endpoint(as_user=None, mock_current_time=None):
         if isinstance(mock_current_time, datetime):
             mock_current_time = mock_current_time.isoformat()
-        return client.get(url, HTTP_MOCK_USER_SUB=as_user.external_id, HTTP_MOCK_CURRENT_TIME=mock_current_time)
+        return client.get(
+            url,
+            HTTP_MOCK_USER_SUB=as_user.external_id,
+            HTTP_MOCK_CURRENT_TIME=mock_current_time,
+        )
 
     return _call_list_endpoint
 
@@ -40,12 +44,8 @@ def user_2():
 def test_list_events(call_list_endpoint, user_1, user_2):
     current_time = datetime(2018, 1, 1, tzinfo=pytz.UTC)
 
-    create_event(
-        user_1, title="event 1", start_time=current_time + timedelta(hours=1)
-    )
-    create_event(
-        user_2, title="event 2", start_time=current_time + timedelta(hours=1)
-    )
+    create_event(user_1, title="event 1", start_time=current_time + timedelta(hours=1))
+    create_event(user_2, title="event 2", start_time=current_time + timedelta(hours=1))
 
     assert 2 == len(Event.objects.all())
     response = call_list_endpoint(as_user=user_1, mock_current_time=current_time)

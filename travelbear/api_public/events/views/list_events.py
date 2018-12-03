@@ -14,7 +14,9 @@ from ..models.event import Event
 def list_upcoming_events(request):
     current_time = get_current_utc_time()
     if settings.IS_TEST_ENVIRONMENT:
-        mock_current_time = safe_parse_rfc_3339(request.META.get("HTTP_MOCK_CURRENT_TIME"))
+        mock_current_time = safe_parse_rfc_3339(
+            request.META.get("HTTP_MOCK_CURRENT_TIME")
+        )
         current_time = mock_current_time or get_current_utc_time()
 
     events = list_upcoming_events_for_user(request.user, current_time)

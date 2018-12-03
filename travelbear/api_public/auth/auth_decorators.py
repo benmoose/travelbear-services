@@ -46,7 +46,10 @@ def require_jwt_auth(_func=None, *, public_key=None):
                 claims = decode(token, public_key, algorithms="RS256")
                 user = get_user_by_external_id(external_id=claims["sub"])
                 if user is None:
-                    logger.warning("Received request from unknown user with external-id %s", claims["sub"])
+                    logger.warning(
+                        "Received request from unknown user with external-id %s",
+                        claims["sub"],
+                    )
                     return HttpResponse(status=404)
                 request.user = user
             except InvalidTokenError:
