@@ -21,3 +21,11 @@ def delete_location(location):
         location.is_deleted = True
         location.save(update_fields=["is_deleted", "modified_on"])
     return location
+
+
+def get_moves_starting_at_location(location):
+    return list(location.start_location_for.all())
+
+
+def get_moves_ending_at_location(location):
+    return list(location.end_location_for.all())

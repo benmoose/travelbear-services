@@ -5,7 +5,13 @@ import pytest
 from db_layer.trip import Location
 from db_layer.user import get_or_create_user
 from .trip_layer import create_trip
-from .location_layer import create_location, delete_location
+from .location_layer import (
+    create_location,
+    delete_location,
+    get_moves_starting_at_location,
+    get_moves_ending_at_location,
+)
+from .move_layer import create_move
 
 
 @pytest.fixture
@@ -49,3 +55,17 @@ def test_delete_location(trip):
     assert returned_location.is_deleted
     location.refresh_from_db()
     assert location.is_deleted
+
+
+@pytest.mark.django_db
+def test_get_related_moves(trip):
+    location_1 = create_location(trip, "location 1", lat=0, lng=0)
+    location_2 = create_location(trip, "location 2", lat=0, lng=0)
+    move_1 = create_move(location_1, location_2)
+    move_2 = create_move(location_2, location_1)
+
+    assert get_moves_starting_at_location(location_1) == [move_1]
+    assert get_moves_starting_at_location(location_2) == [move_2]
+
+    assert get_moves_ending_at_location(location_1) == [move_2]
+    assert get_moves_ending_at_location(location_2) == [move_1]
