@@ -8,7 +8,7 @@ class Event(ModelBase):
     created_by = models.ForeignKey(User, on_delete=models.PROTECT, db_index=True)
     title = models.TextField()
     description = models.TextField(blank=True)
-    start_time = models.DateTimeField(null=True, blank=True)
+    start_time = models.DateTimeField(null=True, blank=True, db_index=True)
     end_time = models.DateTimeField(null=True, blank=True)
     max_guests = models.PositiveIntegerField(null=True, blank=True)
 
@@ -22,5 +22,6 @@ class Event(ModelBase):
     approx_lng = models.DecimalField(
         max_digits=9, decimal_places=6, null=True, blank=True
     )
-
     protect_real_address = models.BooleanField(default=True)
+
+    is_deleted = models.BooleanField(default=False)

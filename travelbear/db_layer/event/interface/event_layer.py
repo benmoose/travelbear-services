@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from ..models.event import Event
 
 
@@ -30,4 +32,26 @@ def create_event(
         approx_lat=approx_lat,
         approx_lng=approx_lng,
         protect_real_address=protect_real_address,
+    )
+
+
+def list_upcoming_events_for_user(user, search_from_time, include_deleted=False):
+    query = Q(created_by=user, start_time__gte=search_from_time)
+
+    if not include_deleted:
+        query &= Q(is_deleted=False)
+
+    return list(Event.objects.filter(query).order_by("start_time"))
+
+
+def list_events_for_user(user, include_deleted=False, ascending=False):
+    query = Q(created_by=user)
+
+    if not include_deleted:
+        query &= Q(is_deleted=False)
+
+    return list(
+        Event.objects.filter(query).order_by(
+            "created_on" if ascending else "-created_on"
+        )
     )

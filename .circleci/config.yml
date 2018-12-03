@@ -23,12 +23,12 @@ jobs:
     - run:
         name: Run tests
         command: |
-          docker-compose exec -e DB_HOST=db server \
+          docker-compose exec -e DB_HOST=db -e stack=test server \
           pytest --doctest-modules -W ignore::DeprecationWarning travelbear
     - run:
         name: Run linter
         command: |
-          docker-compose exec server \
+          docker-compose exec -e stack=test server \
           black --fast --check --exclude db_layer/migrations travelbear
     - store_test_results:
         path: test-results

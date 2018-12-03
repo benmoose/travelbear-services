@@ -1,12 +1,11 @@
-from unittest.mock import Mock
-
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.backends import default_backend
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse
 from django.test import RequestFactory
 import jwt
 import pytest
 
+from db_layer.user import get_or_create_user
 from .auth_decorators import require_jwt_auth
 
 
@@ -20,7 +19,7 @@ def make_jwt_token(sub="test-sub", valid=True):
     if not valid:
         return jwt.encode(
             payload, test_private_key, algorithm=algorithm, headers={"exp": 1000}
-        )
+        )  # exp in past
     return jwt.encode(payload, test_private_key, algorithm=algorithm)
 
 
@@ -30,43 +29,46 @@ def request_factory():
 
 
 @pytest.fixture
-def get_request(request_factory):
-    def _make_request_with_auth_header(auth_header):
-        return request_factory.get("/", HTTP_AUTHORIZATION=auth_header)
+def create_user():
+    def _create_user(external_id):
+        user, _ = get_or_create_user(external_id=external_id)
+        return user
 
-    return _make_request_with_auth_header
+    return _create_user
 
 
-@pytest.fixture
-def mock_request_handler():
-    return Mock(return_value=HttpResponse(status=200))
+@require_jwt_auth(public_key=test_public_key)
+def protected_endpoint(request, expected_user=None):
+    assert request.user == expected_user
+    return HttpResponse()
 
 
 @pytest.mark.parametrize(
     "authorization",
     ("", "foo", "Bearer: foo", f"Bearer: {make_jwt_token(valid=False)}"),
 )
-def test_require_jwt_auth_not_authenticated(
-    get_request, mock_request_handler, authorization
-):
-    protected_func = require_jwt_auth(mock_request_handler, public_key=test_public_key)
-    response = protected_func(get_request(authorization))
-
+def test_require_jwt_auth_not_authenticated(request_factory, authorization):
+    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
+    response = protected_endpoint(request)
     assert response.status_code == 401
-    assert mock_request_handler.call_count == 0
 
 
-def test_require_jwt_auth_authenticated(get_request, mock_request_handler):
+@pytest.mark.django_db
+def test_require_jwt_auth_authenticated_unknown_user(request_factory, create_user):
     token = make_jwt_token(sub="test-sub")
     authorization = f"Bearer: {token.decode()}"
 
-    protected_func = require_jwt_auth(mock_request_handler, public_key=test_public_key)
-    response = protected_func(get_request(authorization))
+    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
+    result = protected_endpoint(request)
+    assert result.status_code == 404
 
-    assert response.status_code == 200
-    assert mock_request_handler.call_count == 1
 
-    args, kwargs = mock_request_handler.call_args
-    request_received = args[0]
-    assert isinstance(request_received, HttpRequest)
-    assert getattr(request_received, "user") == "test-sub"
+@pytest.mark.django_db
+def test_require_jwt_auth_authenticated(request_factory, create_user):
+    user = create_user(external_id="test-sub")
+    token = make_jwt_token(sub="test-sub")
+    authorization = f"Bearer: {token.decode()}"
+
+    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
+    result = protected_endpoint(request, expected_user=user)
+    assert result.status_code == 200

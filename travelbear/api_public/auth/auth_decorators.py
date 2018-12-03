@@ -4,11 +4,13 @@ from pathlib import Path
 
 from cryptography.x509 import load_pem_x509_certificate
 from cryptography.hazmat.backends import default_backend
+from django.conf import settings
 from django.http import HttpResponse
 from jwt import decode
 from jwt.exceptions import InvalidTokenError
 
 from common.request import get_authorization_header
+from db_layer.user import get_user_by_external_id
 
 
 logger = logging.getLogger(__name__)
@@ -16,21 +18,23 @@ logger = logging.getLogger(__name__)
 CERTIFICATE_NAME = "travel-bear.pem"
 CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
+TEST_ENVIRONMENT_MOCK_SUB_HEADER = "HTTP_MOCK_USER_SUB"
+
 
 def require_jwt_auth(_func=None, *, public_key=None):
-    """
-    This rejects requests without a valid JWT token in the authorization header.
-    If invalid:
-     - return HTTP 401
-    If valid:
-     - Populate request.user with the JWT's sub claim
-    """
     if public_key is None:
         public_key = get_public_key_from_certificate_file()
 
     def decorator_require_jwt_auth(func):
         @functools.wraps(func)
         def wrapper(request, *args, **kwargs):
+            # if test env and mock header set, skip JWT check
+            if settings.IS_TEST_ENVIRONMENT:
+                mock_user_sub = request.META.get(TEST_ENVIRONMENT_MOCK_SUB_HEADER)
+                if mock_user_sub is not None:
+                    request.user = get_user_by_external_id(mock_user_sub)
+                    return func(request, *args, **kwargs)
+
             auth_header = get_authorization_header(request)
 
             if auth_header is None:
@@ -40,7 +44,14 @@ def require_jwt_auth(_func=None, *, public_key=None):
 
             try:
                 claims = decode(token, public_key, algorithms="RS256")
-                request.user = claims["sub"]
+                user = get_user_by_external_id(external_id=claims["sub"])
+                if user is None:
+                    logger.warning(
+                        "Received request from unknown user with external-id %s",
+                        claims["sub"],
+                    )
+                    return HttpResponse(status=404)
+                request.user = user
             except InvalidTokenError:
                 return HttpResponse(status=401)
             except KeyError:
