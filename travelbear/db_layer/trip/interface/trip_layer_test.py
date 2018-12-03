@@ -44,7 +44,6 @@ def test_delete_trip(create_user):
     assert trip.is_deleted
 
 
-
 @pytest.mark.django_db
 def test_list_trips_for_user(create_user):
     user_1 = create_user("1")

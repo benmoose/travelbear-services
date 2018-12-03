@@ -23,7 +23,11 @@ def trip(user):
 def test_create_location(trip):
     assert 0 == len(Location.objects.all())
     create_location(
-        trip, display_name="London", lat=51.0056459234001, lng=0, google_place_id="foobar"
+        trip,
+        display_name="London",
+        lat=51.0056459234001,
+        lng=0,
+        google_place_id="foobar",
     )
     assert 1 == len(Location.objects.all())
 
