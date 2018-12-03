@@ -3,6 +3,7 @@ import pytest
 
 from django.http import HttpResponse
 
+from common.model import api_model
 from .success_response import success_response, ResponseError
 
 
@@ -22,3 +23,14 @@ def test_success_response(status, data):
 def test_un_serializable_success_response():
     with pytest.raises(ResponseError):
         success_response(data=lambda x: x)
+
+
+def test_serialise_api_model():
+    @api_model
+    class Foo:
+        __slots__ = ("a", "b")
+
+    response = success_response(data=Foo(1, 2))
+
+    response_data = json.loads(response.content)
+    assert response_data == {"a": 1, "b": 2}

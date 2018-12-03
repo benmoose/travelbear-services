@@ -10,6 +10,7 @@ from jwt import decode
 from jwt.exceptions import InvalidTokenError
 
 from common.request import get_authorization_header
+from db_layer.user import get_user_by_external_id
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ def require_jwt_auth(_func=None, *, public_key=None):
             if settings.IS_TEST_ENVIRONMENT:
                 mock_user_sub = request.META.get(TEST_ENVIRONMENT_MOCK_SUB_HEADER)
                 if mock_user_sub is not None:
-                    request.user = mock_user_sub
+                    request.user = get_user_by_external_id(mock_user_sub)
                     return func(request, *args, **kwargs)
 
             auth_header = get_authorization_header(request)
@@ -43,7 +44,11 @@ def require_jwt_auth(_func=None, *, public_key=None):
 
             try:
                 claims = decode(token, public_key, algorithms="RS256")
-                setattr(request, "user_id", claims["sub"])
+                user = get_user_by_external_id(external_id=claims["sub"])
+                if user is None:
+                    logger.warning("Received request from unknown user with external-id %s", claims["sub"])
+                    return HttpResponse(status=401)
+                request.user = user
             except InvalidTokenError:
                 return HttpResponse(status=401)
             except KeyError:

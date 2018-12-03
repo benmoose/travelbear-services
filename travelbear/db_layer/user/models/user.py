@@ -4,7 +4,7 @@ from db_layer.model_base import ModelBase
 
 
 class User(ModelBase):
-    auth0_id = models.CharField(
+    external_id = models.CharField(
         max_length=255, null=False, blank=False, unique=True, db_index=True
     )
     email = models.EmailField(blank=True)

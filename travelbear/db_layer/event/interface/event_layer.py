@@ -36,7 +36,7 @@ def create_event(
 
 
 def list_upcoming_events_for_user(user, search_from_time, include_deleted=False):
-    query = Q(start_time__gte=search_from_time)
+    query = Q(created_by=user, start_time__gte=search_from_time)
 
     if not include_deleted:
         query &= Q(is_deleted=False)
