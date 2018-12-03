@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytest
-import pytz
 
 from django.test import Client
 from django.urls import reverse
@@ -8,12 +7,12 @@ from django.urls import reverse
 from common.parse import safe_parse_json
 from db_layer.trip import create_trip, Trip
 from db_layer.user import get_or_create_user
-from ..urls import root
+from .handlers import index
 
 
 @pytest.fixture
 def call_list_endpoint():
-    url = reverse(root)
+    url = reverse(index)
     client = Client()
 
     def _call_list_endpoint(as_user=None, mock_current_time=None):
