@@ -5,10 +5,10 @@ from pathlib import Path
 from cryptography.x509 import load_pem_x509_certificate
 from cryptography.hazmat.backends import default_backend
 from django.conf import settings
-from django.http import HttpResponse
 from jwt import decode
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import DecodeError
 
+from common.response import error_response
 from common.request import get_authorization_header
 from db_layer.user import get_user_by_external_id
 
@@ -18,7 +18,11 @@ logger = logging.getLogger(__name__)
 CERTIFICATE_NAME = "travel-bear.pem"
 CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
-TEST_ENVIRONMENT_MOCK_SUB_HEADER = "HTTP_MOCK_USER_SUB"
+TEST_ENVIRONMENT_TEST_USER_SUB_HEADER = "HTTP_TEST_USER_EXTERNAL_ID"
+
+
+class UnknownUser(ValueError):
+    pass
 
 
 def require_jwt_auth(_func=None, *, public_key=None):
@@ -28,35 +32,29 @@ def require_jwt_auth(_func=None, *, public_key=None):
     def decorator_require_jwt_auth(func):
         @functools.wraps(func)
         def wrapper(request, *args, **kwargs):
-            # if test env and mock header set, skip JWT check
+
             if settings.IS_TEST_ENVIRONMENT:
-                mock_user_sub = request.META.get(TEST_ENVIRONMENT_MOCK_SUB_HEADER)
-                if mock_user_sub is not None:
-                    request.user = get_user_by_external_id(mock_user_sub)
+                user = get_user_from_test_user_header(request.META)
+                if user is not None:
+                    request.user = user
                     return func(request, *args, **kwargs)
 
             auth_header = get_authorization_header(request)
-
             if auth_header is None:
-                return HttpResponse(status=401)
+                return error_response(
+                    status=401, message="missing authorization header"
+                )
 
             token = get_token_from_authorization_header(auth_header)
 
             try:
-                claims = decode(token, public_key, algorithms="RS256")
-                user = get_user_by_external_id(external_id=claims["sub"])
-                if user is None:
-                    logger.warning(
-                        "Received request from unknown user with external-id %s",
-                        claims["sub"],
-                    )
-                    return HttpResponse(status=404)
-                request.user = user
-            except InvalidTokenError:
-                return HttpResponse(status=401)
-            except KeyError:
-                logger.warning("Got JWT with no sub claim: %s", token)
-                return HttpResponse(status=401)
+                user = get_user_from_jwt_token(token, public_key)
+            except DecodeError:
+                return error_response(status=401, message="Invalid authorization token")
+            except UnknownUser:
+                return error_response(status=404)
+
+            request.user = user
             return func(request, *args, **kwargs)
 
         return wrapper
@@ -77,6 +75,24 @@ def read_certificate_from_file(certificate_file):
     with open(certificate_file) as f:
         certificate = f.read().encode()
         return load_pem_x509_certificate(certificate, default_backend())
+
+
+def get_user_from_jwt_token(jwt_token, public_key):
+    claims = decode(jwt_token, public_key, algorithms="RS256")
+    user = get_user_by_external_id(external_id=claims["sub"])
+    if user is None:
+        logger.warning(
+            "Received request from unknown user with external-id %s", claims["sub"]
+        )
+        raise UnknownUser
+    return user
+
+
+def get_user_from_test_user_header(request_headers):
+    mock_user_sub = request_headers.get(TEST_ENVIRONMENT_TEST_USER_SUB_HEADER)
+    if mock_user_sub is None:
+        return None
+    return get_user_by_external_id(mock_user_sub)
 
 
 def get_token_from_authorization_header(authorization_header):
