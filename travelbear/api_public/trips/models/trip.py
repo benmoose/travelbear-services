@@ -15,7 +15,9 @@ class Trip:
 
     def __post_init__(self):
         if self.locations:
-            self.locations = [Location.from_db_model(location) for location in self.locations]
+            self.locations = [
+                Location.from_db_model(location) for location in self.locations
+            ]
 
     def get_validation_errors(self):
         errors = validation.required_fields(self, ("title",))

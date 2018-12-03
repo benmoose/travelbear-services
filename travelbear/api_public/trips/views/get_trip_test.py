@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.test import Client
 from django.urls import reverse
 import pytest
@@ -31,20 +33,33 @@ def location(trip):
 
 
 @pytest.fixture
-def endpoint(trip):
-    return reverse(get_trip_handler, kwargs={"trip_id": trip.trip_id})
+def endpoint():
+    def _endpoint(trip_id):
+        return reverse(get_trip_handler, kwargs={"trip_id": trip_id})
+
+    return _endpoint
 
 
 @pytest.fixture
-def call_endpoint(api_client, endpoint):
-    def _call_endpoint():
-        return api_client.get(endpoint, HTTP_TEST_USER_EXTERNAL_ID="test-user")
+def call_endpoint(api_client, endpoint, user):
+    def _call_endpoint(trip_id):
+        return api_client.get(
+            endpoint(trip_id), HTTP_TEST_USER_EXTERNAL_ID=user.external_id
+        )
+
     return _call_endpoint
 
 
 @pytest.mark.django_db
+def test_return_trip_no_trip(call_endpoint):
+    response = call_endpoint(trip_id=str(uuid4()))
+    assert response.status_code == 404
+    assert safe_parse_json(response.content) == {"error": True}
+
+
+@pytest.mark.django_db
 def test_return_trip_without_locations(call_endpoint, trip):
-    response = call_endpoint()
+    response = call_endpoint(trip_id=trip.trip_id)
     assert response.status_code == 200
     response_body = safe_parse_json(response.content)
     assert response_body == {
@@ -58,7 +73,7 @@ def test_return_trip_without_locations(call_endpoint, trip):
 
 @pytest.mark.django_db
 def test_return_trip_with_locations(call_endpoint, trip, location):
-    response = call_endpoint()
+    response = call_endpoint(trip_id=trip.trip_id)
     assert response.status_code == 200
     response_body = safe_parse_json(response.content)
     assert response_body == {
@@ -71,7 +86,7 @@ def test_return_trip_with_locations(call_endpoint, trip, location):
                 "display_name": "London",
                 "lat": "51.105667",
                 "lng": "-0.120000",
-            },
+            }
         ],
         "is_deleted": False,
     }

@@ -10,7 +10,4 @@ def root(request):
         return create_trip.create_trip_handler(request)
 
 
-urlpatterns = [
-    path("", root),
-    path("/<trip_id>", get_trip.get_trip_handler),
-]
+urlpatterns = [path("", root), path("<trip_id>/", get_trip.get_trip_handler)]
