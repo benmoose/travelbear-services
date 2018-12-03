@@ -1,10 +1,12 @@
 from datetime import datetime
 import pytest
 import pytz
+from uuid import uuid4
 
 from db_layer.user import get_or_create_user
 from ..models.trip import Trip
-from .trip_layer import create_trip, delete_trip, list_trips_for_user
+from .location_layer import create_location
+from .trip_layer import create_trip, delete_trip, list_trips_for_user, get_trip_by_id
 
 
 @pytest.fixture
@@ -65,3 +67,17 @@ def test_list_trips_for_user(create_user):
     trip_1.save()
     assert [trip_2] == list_trips_for_user(user=user_1)
     assert [trip_2, trip_1] == list_trips_for_user(user=user_1, include_deleted=True)
+
+
+@pytest.mark.django_db
+def test_get_trip_by_id(django_assert_num_queries, create_user):
+    user = create_user("test-user")
+    trip = create_trip(user, "test trip")
+    location = create_location(trip, "location", lat=4, lng=2)
+
+    with django_assert_num_queries(2):
+        trip = get_trip_by_id(trip.trip_id)
+        assert trip.title == "test trip"
+        assert trip.locations == [location]
+
+    assert get_trip_by_id(uuid4()) is None

@@ -1,7 +1,7 @@
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 
-from ..models.trip import Trip
+from db_layer.trip import Trip, Location
 
 
 def create_trip(created_by, title, description="", tags=None):
@@ -31,3 +31,13 @@ def list_trips_for_user(user, include_deleted=False, ascending=False):
             "created_on" if ascending else "-created_on"
         )
     )
+
+
+def get_trip_by_id(trip_id):
+    try:
+        locations_qs = Location.objects.filter(is_deleted=False)
+        return Trip.objects.prefetch_related(
+            Prefetch("location_set", queryset=locations_qs, to_attr="locations")
+        ).get(trip_id=trip_id)
+    except Trip.DoesNotExist:
+        return None

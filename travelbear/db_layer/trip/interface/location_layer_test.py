@@ -1,4 +1,5 @@
 from decimal import Decimal
+from uuid import uuid4
 
 import pytest
 
@@ -8,6 +9,7 @@ from .trip_layer import create_trip
 from .location_layer import (
     create_location,
     delete_location,
+    get_location_by_id,
     get_moves_starting_at_location,
     get_moves_ending_at_location,
 )
@@ -39,7 +41,7 @@ def test_create_location(trip):
 
     location_in_db = Location.objects.all()[0]
     assert location_in_db.display_name == "London"
-    assert location_in_db.lat == Decimal("51.005646")
+    assert location_in_db.lat == Decimal("51.005646")  # truncated to 6 dp
     assert location_in_db.lng == Decimal("0")
     assert location_in_db.google_place_id == "foobar"
 
@@ -55,6 +57,21 @@ def test_delete_location(trip):
     assert returned_location.is_deleted
     location.refresh_from_db()
     assert location.is_deleted
+
+
+@pytest.mark.django_db
+def test_get_location_by_id(django_assert_num_queries, trip):
+    location_1 = create_location(trip, "test location", lat=0, lng=0)
+    location_2 = create_location(trip, "test location", lat=0, lng=0)
+    move = create_move(location_1, location_2)
+
+    with django_assert_num_queries(3):
+        location = get_location_by_id(location_1.location_id)
+        assert location.pk == location_1.pk
+        assert location.start_for == [move]
+        assert location.end_for == []
+
+    assert get_location_by_id(uuid4()) is None
 
 
 @pytest.mark.django_db
