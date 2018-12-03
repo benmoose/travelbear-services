@@ -21,7 +21,7 @@ def call_list_endpoint():
             mock_current_time = mock_current_time.isoformat()
         return client.get(
             url,
-            HTTP_MOCK_USER_EXTERNAL_ID=as_user.external_id,
+            HTTP_TEST_USER_EXTERNAL_ID=as_user.external_id,
             HTTP_MOCK_CURRENT_TIME=mock_current_time,
         )
 

@@ -16,7 +16,7 @@ def count_trips_in_db():
 
 @pytest.fixture
 def api_client():
-    return Client(HTTP_MOCK_USER_EXTERNAL_ID="foo")
+    return Client(HTTP_TEST_USER_EXTERNAL_ID="foo")
 
 
 @pytest.fixture
