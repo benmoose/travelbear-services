@@ -19,7 +19,7 @@ def test_create_user():
 
 
 @pytest.mark.django_db
-def test_get_user():
+def test_get_or_create_user():
     assert_rows_in_db(0)
     user_1, _ = get_or_create_user(
         external_id="auth0-id",
@@ -38,8 +38,3 @@ def test_get_user():
     user_3, _ = get_or_create_user(external_id="auth0-id-1", email="test@domain.com")
     assert user_3 != user_1
     assert_rows_in_db(2)
-
-
-@pytest.mark.django_db
-def test_integrity_error():
-    user_1, _ = get_or_create_user(external_id="id-1")

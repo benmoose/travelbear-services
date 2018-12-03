@@ -1,2 +1,2 @@
-from .event import Event
+from .trip import Trip
 from .user import User

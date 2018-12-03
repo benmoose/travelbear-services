@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 CERTIFICATE_NAME = "travel-bear.pem"
 CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
-TEST_ENVIRONMENT_MOCK_SUB_HEADER = "HTTP_MOCK_USER_SUB"
+TEST_ENVIRONMENT_MOCK_SUB_HEADER = "HTTP_MOCK_USER_EXTERNAL_ID"
 
 
 def require_jwt_auth(_func=None, *, public_key=None):
