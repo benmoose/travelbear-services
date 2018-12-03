@@ -1,16 +1,18 @@
 from datetime import datetime
 import pytest
 import pytz
+from uuid import uuid4
 
 from db_layer.user import get_or_create_user
 from ..models.trip import Trip
-from .trip_layer import create_trip, list_trips_for_user
+from .location_layer import create_location
+from .trip_layer import create_trip, delete_trip, list_trips_for_user, get_trip_by_id
 
 
 @pytest.fixture
 def create_user():
-    def _create_user(user_id):
-        user, _ = get_or_create_user(user_id, f"{user_id}@test.com")
+    def _create_user(external_id):
+        user, _ = get_or_create_user(external_id, f"{external_id}@test.com")
         return user
 
     return _create_user
@@ -28,6 +30,20 @@ def test_create_trip(create_user):
     assert trip == trip_in_db
     assert trip.created_by == trip_in_db.created_by  # only compares pk
     assert trip.title == trip_in_db.title
+
+
+@pytest.mark.django_db
+def test_delete_trip(create_user):
+    user = create_user("test-user")
+    trip = create_trip(user, title="test trip")
+    assert not trip.is_deleted
+
+    returned_trip = delete_trip(trip)
+
+    assert returned_trip.pk == trip.pk
+    assert returned_trip.is_deleted
+    trip.refresh_from_db()
+    assert trip.is_deleted
 
 
 @pytest.mark.django_db
@@ -51,3 +67,17 @@ def test_list_trips_for_user(create_user):
     trip_1.save()
     assert [trip_2] == list_trips_for_user(user=user_1)
     assert [trip_2, trip_1] == list_trips_for_user(user=user_1, include_deleted=True)
+
+
+@pytest.mark.django_db
+def test_get_trip_by_id(django_assert_num_queries, create_user):
+    user = create_user("test-user")
+    trip = create_trip(user, "test trip")
+    location = create_location(trip, "location", lat=4, lng=2)
+
+    with django_assert_num_queries(2):
+        trip = get_trip_by_id(trip.trip_id)
+        assert trip.title == "test trip"
+        assert trip.locations == [location]
+
+    assert get_trip_by_id(uuid4()) is None

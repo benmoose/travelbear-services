@@ -16,4 +16,5 @@ class Trip(ModelBase):
     title = models.TextField()
     description = models.TextField(blank=True)
     tags = JSONField(null=True, blank=True)
+
     is_deleted = models.BooleanField(default=False)
