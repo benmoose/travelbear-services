@@ -7,7 +7,7 @@ from django.test import Client
 from common.parse import safe_parse_json
 from db_layer.trip import Trip
 from db_layer.user import get_or_create_user
-from ..urls import root
+from .handlers import index
 
 
 def count_trips_in_db():
@@ -21,7 +21,7 @@ def api_client():
 
 @pytest.fixture
 def endpoint_url():
-    return reverse(root)
+    return reverse(index)
 
 
 @pytest.fixture
