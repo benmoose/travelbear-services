@@ -52,14 +52,14 @@ def call_endpoint(api_client, endpoint, user):
 
 @pytest.mark.django_db
 def test_return_trip_no_trip(call_endpoint):
-    response = call_endpoint(trip_id=str(uuid4()))
+    response = call_endpoint(str(uuid4()))
     assert response.status_code == 404
     assert safe_parse_json(response.content) == {"error": True}
 
 
 @pytest.mark.django_db
 def test_return_trip_without_locations(call_endpoint, trip):
-    response = call_endpoint(trip_id=trip.trip_id)
+    response = call_endpoint(trip.trip_id)
     assert response.status_code == 200
     response_body = safe_parse_json(response.content)
     assert response_body == {
@@ -73,7 +73,7 @@ def test_return_trip_without_locations(call_endpoint, trip):
 
 @pytest.mark.django_db
 def test_return_trip_with_locations(call_endpoint, trip, location):
-    response = call_endpoint(trip_id=trip.trip_id)
+    response = call_endpoint(trip.trip_id)
     assert response.status_code == 200
     response_body = safe_parse_json(response.content)
     assert response_body == {
@@ -86,6 +86,7 @@ def test_return_trip_with_locations(call_endpoint, trip, location):
                 "display_name": "London",
                 "lat": "51.105667",
                 "lng": "-0.120000",
+                "google_place_id": "",
             }
         ],
         "is_deleted": False,
