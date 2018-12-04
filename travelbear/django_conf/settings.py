@@ -31,8 +31,7 @@ JWT_AUTH_PUBLIC_KEY = None
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "xlsz^pu&rp0el9zzx*xb39bu=vo7qlgyx3m%&dariuwa3opzr_"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
