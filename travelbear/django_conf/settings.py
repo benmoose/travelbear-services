@@ -19,6 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STACK = os.getenv("stack")
 
 IS_TEST_ENVIRONMENT = STACK == "test"
+IS_DEV_ENVIRONMENT = STACK == "development"
 
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
@@ -31,7 +32,7 @@ JWT_AUTH_PUBLIC_KEY = None
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "xlsz^pu&rp0el9zzx*xb39bu=vo7qlgyx3m%&dariuwa3opzr_"
 
-DEBUG = False
+DEBUG = IS_DEV_ENVIRONMENT
 
 ALLOWED_HOSTS = []
 
