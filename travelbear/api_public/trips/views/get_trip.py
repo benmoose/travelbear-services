@@ -14,7 +14,6 @@ def get_trip_handler(request, trip_id):
         return error_response(status=404)
 
     trip = get_response_trip(db_trip)
-
     return success_response(data=trip)
 
 

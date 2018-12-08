@@ -1,10 +1,10 @@
 from django.urls import path
 
-from .views import get_trip, create_location, handlers
+from .views import create_location, handlers
 
 
 urlpatterns = [
-    path("", handlers.index),
-    path("<trip_id>/", get_trip.get_trip_handler),
+    path("", handlers.root_endpoint),
+    path("<trip_id>/", handlers.trip_id_endpoint),
     path("<trip_id>/locations/", create_location.create_location_handler),
 ]

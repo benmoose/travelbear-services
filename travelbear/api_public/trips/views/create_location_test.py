@@ -53,7 +53,6 @@ def test_create_location_no_trip(call_endpoint):
     assert 0 == len(Location.objects.all())
     response = call_endpoint(uuid4())
     assert response.status_code == 404
-    assert safe_parse_json(response.content) == {"error": True}
     assert 0 == len(Location.objects.all())
 
 
