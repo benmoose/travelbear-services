@@ -2,6 +2,7 @@ from django.db import transaction
 from django.db.models import Prefetch
 
 from db_layer.trip import Location, Move
+from db_layer.utils import get_fields_to_update
 
 
 def create_location(trip, display_name, lat, lng, google_place_id=""):
@@ -41,3 +42,16 @@ def get_moves_starting_at_location(location):
 
 def get_moves_ending_at_location(location):
     return list(location.end_location_for.all())
+
+
+def update_location(user, location, **kwargs):
+    updateable_fields = {"display_name", "lat", "lng", "google_place_id"}
+    fields_to_update = get_fields_to_update(updateable_fields, kwargs.keys())
+    with transaction.atomic():
+        location = Location.objects.select_for_update().get(
+            trip__created_by=user, pk=location.pk
+        )
+        for field in fields_to_update:
+            setattr(location, field, kwargs.get(field))
+        location.save(update_fields=[*fields_to_update, "modified_on"])
+    return location
