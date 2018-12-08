@@ -7,7 +7,13 @@ from db_layer.user import get_or_create_user
 from db_layer.utils import UpdateNotAllowed
 from ..models.trip import Trip
 from .location_layer import create_location
-from .trip_layer import create_trip, delete_trip, list_trips_for_user, get_trip_by_id, update_trip
+from .trip_layer import (
+    create_trip,
+    delete_trip,
+    list_trips_for_user,
+    get_trip_by_id,
+    update_trip,
+)
 
 
 @pytest.fixture
@@ -94,8 +100,16 @@ def test_get_trip_by_id(django_assert_num_queries, create_user):
 @pytest.mark.django_db
 def test_update_trip(create_user):
     user = create_user("foo")
-    original_trip = create_trip(user, title="bad title", description="bad desc", tags=["a", "b"])
-    update_1 = update_trip(user, original_trip, title="good title", description="good desc", tags=["1", "2"])
+    original_trip = create_trip(
+        user, title="bad title", description="bad desc", tags=["a", "b"]
+    )
+    update_1 = update_trip(
+        user,
+        original_trip,
+        title="good title",
+        description="good desc",
+        tags=["1", "2"],
+    )
 
     assert original_trip.pk == update_1.pk
     assert update_1.title == "good title"
@@ -116,7 +130,9 @@ def test_update_trip_not_allowed_fields(create_user):
     user = create_user("foo")
     trip = create_trip(user, title="original title")
     with pytest.raises(UpdateNotAllowed):
-        update_trip(user, trip, title="updated title", foo="wtf is this field", bar=[1, 2, 3])
+        update_trip(
+            user, trip, title="updated title", foo="wtf is this field", bar=[1, 2, 3]
+        )
 
     trip.refresh_from_db()
     assert trip.title == "original title"
