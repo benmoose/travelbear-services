@@ -8,5 +8,6 @@ from .interface.trip_layer import (
     delete_trip,
     list_trips_for_user,
     get_trip_by_id,
+    update_trip,
 )
 from .interface.move_layer import create_move, delete_move

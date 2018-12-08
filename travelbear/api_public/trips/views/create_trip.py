@@ -19,7 +19,7 @@ def create_trip_handler(request):
 
 
 def get_trip_from_request_body(request_body):
-    parsed_body = safe_parse_json(request_body)
+    parsed_body = safe_parse_json(request_body) or {}
     return Trip.from_dict(parsed_body)
 
 
