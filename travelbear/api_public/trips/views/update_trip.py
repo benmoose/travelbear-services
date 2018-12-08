@@ -19,11 +19,9 @@ def update_trip_handler(request, trip_id):
     if parsed_body is None:
         return error_response(message="Could not parse JSON body")
     try:
-        updated_trip = update_trip(
-            request.user,
-            db_trip,
-            **parsed_body,
+        updated_trip = update_trip(request.user, db_trip, **parsed_body)
+    except UpdateNotAllowed:
+        return validation_error_response(
+            validation_errors=["Cannot update one or more requested fields"]
         )
-    except UpdateNotAllowed as e:
-        return validation_error_response(validation_errors=["Cannot update one or more requested fields"])
     return success_response(data=Trip.from_db_model(updated_trip))
