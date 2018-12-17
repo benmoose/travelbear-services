@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml \
+docker-compose \
     run --rm --no-deps server black --exclude db_layer/migrations ./travelbear $@

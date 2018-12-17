@@ -1,4 +1,4 @@
 #!/bin/bash
 
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml \
-    run -e stack=development --rm server
+docker-compose \
+    run --rm server python travelbear/manage.py runserver 0.0.0.0:8000

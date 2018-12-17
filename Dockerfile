@@ -8,3 +8,5 @@ COPY requirements*.txt ./
 RUN pip install -r requirements.test.txt
 
 COPY . .
+
+EXPOSE 8000
