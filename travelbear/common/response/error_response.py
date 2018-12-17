@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def error_response(status=400, message=None):
-    data = {"error": True}
+    data = {"ok": False}
     if message is not None:
         data.update({"message": message})
 
@@ -15,7 +15,7 @@ def error_response(status=400, message=None):
 
 
 def validation_error_response(status=400, validation_errors=None):
-    data = {"error": True}
+    data = {"ok": False}
     if not isinstance(validation_errors, (list, type(None))):
         logger.warning(
             "Received a %s type argument when returning a validation error response, expected list type",

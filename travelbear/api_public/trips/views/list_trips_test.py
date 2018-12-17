@@ -7,12 +7,12 @@ from django.urls import reverse
 from common.parse import safe_parse_json
 from db_layer.trip import create_trip, Trip
 from db_layer.user import get_or_create_user
-from .handlers import index
+from .handlers import root_endpoint
 
 
 @pytest.fixture
 def call_list_endpoint():
-    url = reverse(index)
+    url = reverse(root_endpoint)
     client = Client()
 
     def _call_list_endpoint(as_user=None, mock_current_time=None):

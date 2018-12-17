@@ -5,6 +5,7 @@ import pytest
 
 from db_layer.trip import Location
 from db_layer.user import get_or_create_user
+from db_layer.utils import UpdateNotAllowed
 from .trip_layer import create_trip
 from .location_layer import (
     create_location,
@@ -12,6 +13,7 @@ from .location_layer import (
     get_location_by_id,
     get_moves_starting_at_location,
     get_moves_ending_at_location,
+    update_location,
 )
 from .move_layer import create_move
 
@@ -34,7 +36,7 @@ def test_create_location(trip):
         trip,
         display_name="London",
         lat=51.0056459234001,
-        lng=0,
+        lng=0.00000145,
         google_place_id="foobar",
     )
     assert 1 == len(Location.objects.all())
@@ -42,7 +44,7 @@ def test_create_location(trip):
     location_in_db = Location.objects.all()[0]
     assert location_in_db.display_name == "London"
     assert location_in_db.lat == Decimal("51.005646")  # truncated to 6 dp
-    assert location_in_db.lng == Decimal("0")
+    assert location_in_db.lng == Decimal("0.000001")
     assert location_in_db.google_place_id == "foobar"
 
 
@@ -86,3 +88,31 @@ def test_get_related_moves(trip):
 
     assert get_moves_ending_at_location(location_1) == [move_2]
     assert get_moves_ending_at_location(location_2) == [move_1]
+
+
+@pytest.mark.django_db
+def test_update_location(user, trip):
+    original_location = create_location(trip, display_name="location 1", lat=51, lng=1)
+    update_1 = update_location(
+        user, original_location, display_name="location 2", lat=52, lng=2
+    )
+
+    assert original_location.pk == update_1.pk
+    assert update_1.display_name == "location 2"
+    assert update_1.lat == 52
+    assert update_1.lng == 2
+
+    update_2 = update_location(user, update_1, lng=3)
+    assert update_1.pk == update_2.pk
+    assert update_2.display_name == "location 2"
+    assert update_2.lat == 52
+    assert update_2.lng == 3
+
+    assert 1 == len(Location.objects.all())
+
+
+@pytest.mark.django_db
+def test_update_location_not_allowed_fields(user, trip):
+    location = create_location(trip, display_name="location", lat=51, lng=1)
+    with pytest.raises(UpdateNotAllowed):
+        update_location(user, location, is_deleted=True)

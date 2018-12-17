@@ -13,7 +13,7 @@ from .error_response import error_response, validation_error_response
 def test_error_response(status, message):
     response = error_response(status=status, message=message)
 
-    expected_response_data = {"error": True}
+    expected_response_data = {"ok": False}
     if message is not None:
         expected_response_data.update({"message": message})
 
@@ -31,7 +31,7 @@ def test_validation_error_response(status, validation_errors):
         status=status, validation_errors=validation_errors
     )
 
-    expected_response_data = {"error": True}
+    expected_response_data = {"ok": False}
     if validation_errors is not None:
         expected_response_data.update({"validation_errors": validation_errors})
 

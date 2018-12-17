@@ -8,7 +8,7 @@ from common.parse import safe_parse_json
 from db_layer.trip import create_trip, create_location
 from db_layer.user import get_or_create_user
 
-from .get_trip import get_trip_handler
+from .handlers import trip_id_endpoint
 
 
 @pytest.fixture
@@ -33,19 +33,10 @@ def location(trip):
 
 
 @pytest.fixture
-def endpoint():
-    def _endpoint(trip_id):
-        return reverse(get_trip_handler, kwargs={"trip_id": trip_id})
-
-    return _endpoint
-
-
-@pytest.fixture
-def call_endpoint(api_client, endpoint, user):
+def call_endpoint(api_client, user):
     def _call_endpoint(trip_id):
-        return api_client.get(
-            endpoint(trip_id), HTTP_TEST_USER_EXTERNAL_ID=user.external_id
-        )
+        url = reverse(trip_id_endpoint, kwargs={"trip_id": trip_id})
+        return api_client.get(url, HTTP_TEST_USER_EXTERNAL_ID=user.external_id)
 
     return _call_endpoint
 
@@ -54,7 +45,6 @@ def call_endpoint(api_client, endpoint, user):
 def test_return_trip_no_trip(call_endpoint):
     response = call_endpoint(str(uuid4()))
     assert response.status_code == 404
-    assert safe_parse_json(response.content) == {"error": True}
 
 
 @pytest.mark.django_db

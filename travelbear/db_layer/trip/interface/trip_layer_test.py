@@ -4,9 +4,16 @@ import pytz
 from uuid import uuid4
 
 from db_layer.user import get_or_create_user
+from db_layer.utils import UpdateNotAllowed
 from ..models.trip import Trip
 from .location_layer import create_location
-from .trip_layer import create_trip, delete_trip, list_trips_for_user, get_trip_by_id
+from .trip_layer import (
+    create_trip,
+    delete_trip,
+    list_trips_for_user,
+    get_trip_by_id,
+    update_trip,
+)
 
 
 @pytest.fixture
@@ -23,7 +30,7 @@ def test_create_trip(create_user):
     user = create_user("foo")
 
     assert 0 == len(Trip.objects.all())
-    trip = create_trip(created_by=user, title="test trip")
+    trip = create_trip(user, title="test trip")
     assert 1 == len(Trip.objects.all())
 
     trip_in_db = Trip.objects.all()[0]
@@ -55,11 +62,11 @@ def test_list_trips_for_user(create_user):
     user_1 = create_user("1")
     someone_else = create_user("2")
 
-    _ = create_trip(created_by=someone_else, title="other secret trip we shouldn't see")
+    _ = create_trip(someone_else, title="other secret trip we shouldn't see")
 
-    trip_1 = create_trip(created_by=user_1, title="trip 1")
+    trip_1 = create_trip(user_1, title="trip 1")
     trip_1.save_with_times(created_on=datetime(2018, 1, 1, tzinfo=pytz.UTC))
-    trip_2 = create_trip(created_by=user_1, title="trip 2")
+    trip_2 = create_trip(user_1, title="trip 2")
     trip_2.save_with_times(created_on=datetime(2018, 1, 2, tzinfo=pytz.UTC))
 
     trips = list_trips_for_user(user=user_1)
@@ -88,3 +95,57 @@ def test_get_trip_by_id(django_assert_num_queries, create_user):
 
     someone_else = create_user("someone-else")
     assert get_trip_by_id(someone_else, uuid4()) is None
+
+
+@pytest.mark.django_db
+def test_update_trip(create_user):
+    user = create_user("foo")
+    original_trip = create_trip(
+        user, title="bad title", description="bad desc", tags=["a", "b"]
+    )
+    update_1 = update_trip(
+        user,
+        original_trip,
+        title="good title",
+        description="good desc",
+        tags=["1", "2"],
+    )
+
+    assert original_trip.pk == update_1.pk
+    assert update_1.title == "good title"
+    assert update_1.description == "good desc"
+    assert update_1.tags == ["1", "2"]
+
+    update_2 = update_trip(user, update_1, description="even better desc", tags=[])
+    assert original_trip.pk == update_2.pk
+    assert update_2.title == "good title"
+    assert update_2.description == "even better desc"
+    assert update_2.tags == []
+
+    assert 1 == len(Trip.objects.all())
+
+
+@pytest.mark.django_db
+def test_update_trip_not_allowed_fields(create_user):
+    user = create_user("foo")
+    trip = create_trip(user, title="original title")
+    with pytest.raises(UpdateNotAllowed):
+        update_trip(
+            user, trip, title="updated title", foo="wtf is this field", bar=[1, 2, 3]
+        )
+
+    trip.refresh_from_db()
+    assert trip.title == "original title"
+
+
+@pytest.mark.django_db
+def test_update_other_users_trip(create_user):
+    user = create_user("foo")
+    someone_else = create_user("bar")
+    trip = create_trip(user, title="unspoilt")
+
+    with pytest.raises(Exception):
+        update_trip(someone_else, trip, title="mwahaha")
+
+    trip.refresh_from_db()
+    assert trip.title == "unspoilt"
