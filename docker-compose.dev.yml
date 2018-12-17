@@ -4,5 +4,3 @@ services:
   server:
     volumes:
       - .:/usr/src/app
-    environment:
-      - DB_HOST=db
