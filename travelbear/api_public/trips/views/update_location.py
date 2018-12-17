@@ -20,7 +20,9 @@ def update_location_handler(request, trip_id, location_id):
         return error_response(status=404)
 
     request_body = safe_parse_json(request.body)
-    updated_location, error = update_location_from_dict(request.user, location, request_body)
+    updated_location, error = update_location_from_dict(
+        request.user, location, request_body
+    )
     if error:
         return validation_error_response(validation_errors=[error])
 

@@ -73,11 +73,9 @@ def test_update_location(call_endpoint, user, trip):
 @pytest.mark.django_db
 def test_update_invalid_fields(call_endpoint, user, trip):
     location = create_location(trip, display_name="test location", lat=0, lng=0)
-    response = call_endpoint(user, trip, location, data={
-        "is_deleted": True,
-        "foo": "bar",
-        "lat": 99.99,
-    })
+    response = call_endpoint(
+        user, trip, location, data={"is_deleted": True, "foo": "bar", "lat": 99.99}
+    )
     assert response.status_code == 400
     assert "Cannot update fields:" in str(response.content)
 
