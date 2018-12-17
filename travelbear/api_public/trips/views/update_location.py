@@ -5,6 +5,7 @@ from common.response import error_response, success_response, validation_error_r
 from common.parse import safe_parse_json
 from db_layer.utils import UpdateNotAllowed
 from db_layer.trip import get_trip_by_id, update_location
+from ..models import Location
 
 
 @require_http_methods(["PATCH"])
@@ -19,24 +20,22 @@ def update_location_handler(request, trip_id, location_id):
         return error_response(status=404)
 
     request_body = safe_parse_json(request.body)
-    updated_location = update_location_from_dict(request.user, location, request_body)
-    if not updated_location:
-        return validation_error_response(
-            validation_errors="Cannot update one or more requested fields"
-        )
+    updated_location, error = update_location_from_dict(request.user, location, request_body)
+    if error:
+        return validation_error_response(validation_errors=[error])
 
-    return success_response(data=updated_location)
+    return success_response(data=Location.from_db_model(updated_location))
 
 
 def get_location_by_id_from_trip(trip, location_id):
     for location in trip.locations:
-        if location.location_id == location_id:
+        if str(location.location_id) == location_id:
             return location
     return None
 
 
 def update_location_from_dict(user, location, data):
     try:
-        return update_location(user, location, **data)
-    except UpdateNotAllowed:
-        return None
+        return update_location(user, location, **data), None
+    except UpdateNotAllowed as e:
+        return None, str(e)
