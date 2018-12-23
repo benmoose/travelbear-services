@@ -1,4 +1,4 @@
-# TravelBear Server
+# Travelbear Server
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
@@ -7,9 +7,9 @@
 
  - Install Docker
  - Clone the repo
- - Run tests with `./run-tests.sh` (this will take longer on the first run as the images are built)
+ - Run tests with `./run-tests.sh` (this takes longer on the first run as the images are built)
 
-#### Other commands
+#### Other scripts
 
 `./run-linter.sh` will lint your code for you, be sure to do this before pushing to GitHub as CircleCI
 rejects unlinted code.
