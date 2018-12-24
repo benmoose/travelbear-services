@@ -1,9 +1,9 @@
-.PHONY: run-dev run-prod test lint
+.PHONY: dev prod test lint
 
-run-dev:
+dev:
 	docker-compose up
 
-run-prod:
+prod:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 
 test:
