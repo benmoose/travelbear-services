@@ -34,7 +34,7 @@ SECRET_KEY = "xlsz^pu&rp0el9zzx*xb39bu=vo7qlgyx3m%&dariuwa3opzr_"
 
 DEBUG = IS_DEV_ENVIRONMENT
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition

@@ -1,20 +1,27 @@
-# TravelBear Server
+# Travelbear Server
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 
 #### Quick start
 
- - Install Docker
- - Clone the repo
- - Run tests with `./run-tests.sh` (this will take longer on the first run as the images are built)
+Docker is required for local development.
+Installation instructions are at [docs.docker.com/install](https://docs.docker.com/install/). 
 
-#### Other commands
+ 1. Clone this repo and `cd` into it.
+ 2. Check everything is working correctly by running the test suite: `make test`.
 
-`./run-linter.sh` will lint your code for you, be sure to do this before pushing to GitHub as CircleCI
+#### Scripts
+
+Development scripts are stored in `/Makefile`.
+
+ - `make test` runs the test suite.
+To test a specific package specify it with `pkg`.
+e.g. `make test pkg=api_public.auth`.
+ - `make lint` lints your code for you, be sure to do this before pushing to GitHub as CircleCI
 rejects unlinted code.
-
-`./run-command.sh` runs an abritrary command in the server container, useful for running Django management
-commands. e.g. `./run-command ./travelbear/manage.py makemigrations`.
-
-`./run-server.sh` runs the Django app locally at http://127.0.0.1:8080.
+ - `make ssh` starts a shell on the local server so you can execute arbitrary commands.
+This is useful for running Django management commands.
+e.g. `./run-command ./travelbear/manage.py makemigrations`.
+ - `make dev` runs the Django app locally at http://127.0.0.1:8080.
+ - `make prod` runs the Django app locally at http://127.0.0.1:80.
