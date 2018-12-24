@@ -11,8 +11,6 @@ services:
       - DJANGO_SETTINGS_MODULE=django_conf.settings
       - DB_HOST=db
       - stack=development
-    volumes:
-      - .:/usr/src/app
     depends_on:
       - db
     ports:

@@ -14,7 +14,8 @@ test:
 lint:
 	docker-compose run --rm \
     	--no-deps server black --exclude db_layer/migrations \
-    	./travelbear
+    	travelbear
 
 ssh:
-	docker-compose run --rm server bash
+	docker-compose run --rm \
+		server bash
