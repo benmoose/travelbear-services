@@ -5,7 +5,7 @@ services:
     image: postgres
 
   server:
-    build: .
+    build: operations/django
     command: python travelbear/manage.py runserver 0.0.0.0:8000
     environment:
       - DJANGO_SETTINGS_MODULE=django_conf.settings

@@ -2,7 +2,7 @@ version: '3'
 
 services:
   server:
-    build: .
+    build: operations/django
     restart: always
     command: ["./operations/django/start.sh"]
     environment:
