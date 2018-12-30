@@ -11,5 +11,5 @@ def of_type(self, fields, required_type):
     for field in fields:
         value = getattr(self, field)
         if not isinstance(value, required_type):
-            errors.append(f"{field} must be of type {required_type}")
+            errors.append(f"'{field}' must be of type {required_type.__name__}")
     return errors
