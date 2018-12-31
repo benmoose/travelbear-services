@@ -2,7 +2,12 @@ from .models.location import Location
 from .models.trip import Trip
 from .models.move import Move
 
-from .interface.location_layer import create_location, delete_location, update_location
+from .interface.location_layer import (
+    create_location,
+    delete_location,
+    update_location,
+    get_location_by_id,
+)
 from .interface.trip_layer import (
     create_trip,
     delete_trip,
