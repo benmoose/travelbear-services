@@ -1,4 +1,4 @@
-.PHONY: dev prod test lint
+.PHONY: dev prod test lint ssh
 
 dev:
 	docker-compose up
