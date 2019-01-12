@@ -18,23 +18,22 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 STACK = os.getenv("stack")
 
-IS_TEST_ENVIRONMENT = STACK == "test"
+IS_PROD_ENVIRONMENT = STACK == "production"
 IS_DEV_ENVIRONMENT = STACK == "development"
+IS_TEST_ENVIRONMENT = STACK == "test"
+
 
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+SECRET_KEY = os.getenv("SECRET_KEY", "DEVKEY^0pu&rp0el9zzx*xb39bu=vo7qlgyx3m%&dariuwa3o_")
 
-JWT_AUTH_PUBLIC_KEY = None
-
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "xlsz^pu&rp0el9zzx*xb39bu=vo7qlgyx3m%&dariuwa3opzr_"
 
 DEBUG = IS_DEV_ENVIRONMENT
-
 ALLOWED_HOSTS = ["*"]
+
+JWT_AUTH_PUBLIC_KEY = None
 
 
 # Application definition
