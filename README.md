@@ -10,6 +10,7 @@ Installation instructions are at [docs.docker.com/install](https://docs.docker.c
 
  1. Clone this repo and `cd` into it.
  2. Check everything is working correctly by running the test suite: `make test`.
+ 3. Run the server locally with `make dev`
 
 #### Scripts
 
