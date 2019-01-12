@@ -13,7 +13,7 @@ Installation instructions are at [docs.docker.com/install](https://docs.docker.c
 
 #### Scripts
 
-Development scripts are stored in `/Makefile`.
+Some useful scripts are defined in `Makefile`.
 
  - `make test` runs the test suite.
 To test a specific package specify it with `pkg`.
