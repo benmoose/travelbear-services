@@ -14,7 +14,7 @@ def error_response(status=400, message=None):
     return JsonResponse(data, status=status)
 
 
-def validation_error_response(status=400, validation_errors=None):
+def validation_error_response(validation_errors):
     data = {"ok": False}
     if not isinstance(validation_errors, (list, type(None))):
         logger.warning(
@@ -24,4 +24,4 @@ def validation_error_response(status=400, validation_errors=None):
     if validation_errors is not None:
         data.update({"validation_errors": validation_errors})
 
-    return JsonResponse(data, status=status)
+    return JsonResponse(data, status=400)

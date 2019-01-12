@@ -12,7 +12,7 @@ from ..models.trip import Trip
 def create_trip_handler(request):
     trip = get_trip_from_request_body(request.body)
     if not trip.is_valid:
-        return validation_error_response(validation_errors=trip.validation_errors)
+        return validation_error_response(trip.validation_errors)
 
     created_trip = persist_trip(trip, created_by=request.user)
     return success_response(status=201, data=created_trip)

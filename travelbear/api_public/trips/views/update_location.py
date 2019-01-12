@@ -24,7 +24,7 @@ def update_location_handler(request, trip_id, location_id):
         request.user, location, request_body
     )
     if error:
-        return validation_error_response(validation_errors=[error])
+        return validation_error_response([error])
 
     return success_response(data=Location.from_db_model(updated_location))
 

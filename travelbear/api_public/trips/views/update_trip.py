@@ -21,7 +21,5 @@ def update_trip_handler(request, trip_id):
     try:
         updated_trip = update_trip(request.user, db_trip, **parsed_body)
     except UpdateNotAllowed:
-        return validation_error_response(
-            validation_errors=["Cannot update one or more requested fields"]
-        )
+        return validation_error_response(["Cannot update one or more requested fields"])
     return success_response(data=Trip.from_db_model(updated_trip))
