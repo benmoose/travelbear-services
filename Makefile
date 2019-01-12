@@ -1,21 +1,23 @@
 .PHONY: dev prod test lint ssh
 
 dev:
-	docker-compose up
+	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
+		up
 
 prod:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
+		up
 
 test:
-	docker-compose run --rm \
-		-e stack=test server pytest --doctest-modules \
-		--rootdir travelbear --pyargs "$(pkg)"
+	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
+		run --rm -e stack=test server pytest \
+		--doctest-modules --rootdir travelbear --pyargs "$(pkg)"
 
 lint:
-	docker-compose run --rm \
-		--no-deps server black --exclude db_layer/migrations \
-		travelbear
+	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
+		run --rm --no-deps server black \
+		--exclude db_layer/migrations travelbear
 
 ssh:
-	docker-compose run --rm \
-		server bash
+	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
+		run --rm server bash
