@@ -22,6 +22,5 @@ e.g. `make test pkg=api_public.auth`.
 rejects unlinted code.
  - `make ssh` starts a shell on the local server so you can execute arbitrary commands.
 This is useful for running Django management commands.
-e.g. `./run-command ./travelbear/manage.py makemigrations`.
  - `make dev` runs the Django app locally at http://127.0.0.1:8080.
  - `make prod` runs the Django app locally at http://127.0.0.1:80.

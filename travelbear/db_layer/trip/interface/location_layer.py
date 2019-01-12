@@ -5,6 +5,10 @@ from db_layer.trip import Location, Move
 from db_layer.utils import get_fields_to_update
 
 
+def get_user_locations_qs(user):
+    return Location.objects.filter(trip__created_by=user, is_deleted=False)
+
+
 def create_location(trip, display_name, lat, lng, google_place_id=""):
     return Location.objects.create(
         trip=trip,
@@ -25,13 +29,9 @@ def delete_location(location):
     return location
 
 
-def get_location_by_id(location_id):
+def get_location_by_id(user, location_id):
     try:
-        move_qs = Move.objects.filter(is_deleted=False)
-        return Location.objects.prefetch_related(
-            Prefetch("start_location_for", queryset=move_qs, to_attr="start_for"),
-            Prefetch("end_location_for", queryset=move_qs, to_attr="end_for"),
-        ).get(location_id=location_id)
+        return get_user_locations_qs(user=user).get(location_id=location_id)
     except Location.DoesNotExist:
         return None
 
