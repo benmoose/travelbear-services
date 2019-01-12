@@ -4,7 +4,7 @@ from db_layer.trip import Move
 from db_layer.user import get_or_create_user
 from .location_layer import create_location
 from .trip_layer import create_trip
-from .move_layer import create_move, delete_move
+from .move_layer import create_move, delete_move, get_move_by_move_id
 
 
 @pytest.fixture
@@ -60,3 +60,14 @@ def test_delete_move(location_1, location_2):
     assert returned_move.is_deleted
     move.refresh_from_db()
     assert move.is_deleted
+
+
+@pytest.mark.django_db
+def test_get_move_by_move_id(user, location_1, location_2):
+    db_move = create_move(location_1, location_2)
+
+    retrieved_move = get_move_by_move_id(user, db_move.move_id)
+    assert retrieved_move.pk == db_move.pk
+
+    someone_else, _ = get_or_create_user("someone-else")
+    assert get_move_by_move_id(someone_else, db_move.move_id) is None

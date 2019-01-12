@@ -1,6 +1,6 @@
 from django.db import transaction
 
-from db_layer.trip import Move
+from db_layer.trip import Move, get_location_by_id
 
 
 def create_move(
@@ -23,3 +23,12 @@ def delete_move(move):
         move.is_deleted = True
         move.save(update_fields=["is_deleted", "modified_on"])
     return move
+
+
+def get_move_by_move_id(user, move_id):
+    try:
+        return Move.objects.filter(start_location__trip__created_by=user).get(
+            move_id=move_id, is_deleted=False
+        )
+    except Move.DoesNotExist:
+        return None

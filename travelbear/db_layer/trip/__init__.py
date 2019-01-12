@@ -15,4 +15,4 @@ from .interface.trip_layer import (
     get_trip_by_id,
     update_trip,
 )
-from .interface.move_layer import create_move, delete_move
+from .interface.move_layer import create_move, delete_move, get_move_by_move_id
