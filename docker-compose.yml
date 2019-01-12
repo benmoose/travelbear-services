@@ -7,8 +7,6 @@ services:
   server:
     build: .
     command: python travelbear/manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/usr/src/app
     environment:
       - DJANGO_SETTINGS_MODULE=django_conf.settings
       - DB_HOST=db
