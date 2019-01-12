@@ -55,4 +55,35 @@ def test_create_move_success(call_endpoint, user, trip):
         },
     )
     assert response.status_code == 201
-    assert len(Move.objects.all()) == 1
+    assert 1 == len(Move.objects.all())
+
+
+@pytest.mark.django_db
+def test_create_move_with_other_users_location(call_endpoint, user, trip):
+    my_location = create_location(trip, "my location", 51, 0)
+
+    someone_else, _ = get_or_create_user("someone-else")
+    not_my_location = create_location(
+        trip=create_trip(someone_else, "someone elses trip", "test description"),
+        display_name="not my location",
+        lat=51,
+        lng=0,
+    )
+
+    response = call_endpoint(
+        user=user,
+        data={
+            "start_location_id": str(my_location.location_id),
+            "end_location_id": str(not_my_location.location_id),
+        },
+    )
+    assert response.status_code == 400
+    assert b"does not exist" in response.content
+    assert 0 == len(Move.objects.all())
+
+
+@pytest.mark.django_db
+def test_bad_request(user, call_endpoint):
+    response = call_endpoint(user=user, data={"start_location_id": "foo"})
+    assert response.status_code == 400
+    assert b"required field" in response.content

@@ -62,18 +62,21 @@ def test_delete_location(trip):
 
 
 @pytest.mark.django_db
-def test_get_location_by_id(django_assert_num_queries, trip):
+def test_get_location_by_id(user, trip):
+    location_in_db = create_location(trip, "test location", lat=0, lng=0)
+
+    retrieved_location = get_location_by_id(user, location_in_db.location_id)
+    assert retrieved_location.pk == location_in_db.pk
+    assert retrieved_location.display_name == "test location"
+
+    assert get_location_by_id(user, uuid4()) is None
+
+
+@pytest.mark.django_db
+def test_can_not_get_unowned_locations(trip):
+    someone_else, _ = get_or_create_user("someone-else")
     location_1 = create_location(trip, "test location", lat=0, lng=0)
-    location_2 = create_location(trip, "test location", lat=0, lng=0)
-    move = create_move(location_1, location_2)
-
-    with django_assert_num_queries(3):
-        location = get_location_by_id(location_1.location_id)
-        assert location.pk == location_1.pk
-        assert location.start_for == [move]
-        assert location.end_for == []
-
-    assert get_location_by_id(uuid4()) is None
+    assert get_location_by_id(someone_else, location_1.location_id) is None
 
 
 @pytest.mark.django_db

@@ -7,10 +7,6 @@ from db_layer.trip import create_move, get_location_by_id
 from ..models import Move
 
 
-class LocationDoesNotExist(ValueError):
-    pass
-
-
 @require_jwt_auth
 def create_move_handler(request):
     request_data = safe_parse_json(request.body)
@@ -19,29 +15,44 @@ def create_move_handler(request):
     move_model = Move.from_dict(request_data)
     if not move_model.is_valid:
         return validation_error_response(move_model.validation_errors)
-    try:
-        db_move = persist_move(move_model)
-        response_dict = Move.from_db_model(db_move)
-        return success_response(status=201, data=response_dict)
-    except LocationDoesNotExist as e:
-        return error_response(message=str(e))
 
-
-def persist_move(move_model):
     start_location, end_location = get_locations_from_location_ids(
-        move_model.start_location_id, move_model.end_location_id
+        request.user, move_model.start_location_id, move_model.end_location_id
     )
-    try:
-        return create_move(start_location, end_location)
-    except IntegrityError:
-        raise LocationDoesNotExist(f"One or both location IDs do not exist")
-
-
-def get_locations_from_location_ids(start_location_id, end_location_id):
-    start_location = get_location_by_id(start_location_id)
-    end_location = get_location_by_id(end_location_id)
     if not start_location or not end_location:
-        raise LocationDoesNotExist(
-            "One or more of the specified locations does not exist"
+        validation_errors = get_location_not_found_validation_errors(
+            start_location_id=move_model.start_location_id,
+            end_location_id=move_model.end_location_id,
+            start_location=start_location,
+            end_location=end_location,
         )
+        return validation_error_response(validation_errors)
+
+    db_move = create_move(start_location, end_location)
+
+    response_dict = Move.from_db_model(db_move)
+    return success_response(status=201, data=response_dict)
+
+
+def get_locations_from_location_ids(user, start_location_id, end_location_id):
+    start_location = get_location_by_id(user, start_location_id)
+    end_location = get_location_by_id(user, end_location_id)
     return start_location, end_location
+
+
+def get_location_not_found_validation_errors(
+    start_location_id, end_location_id, start_location, end_location
+):
+    """
+    >>> get_location_not_found_validation_errors("id-1", "id-2", None, True)
+    ["Location with location-id 'id-1' does not exist"]
+    >>> get_location_not_found_validation_errors("id-1", "id-2", True, True)
+    []
+    """
+    return [
+        f"Location with location-id '{location_id}' does not exist"
+        for (location_id, location) in zip(
+            [start_location_id, end_location_id], [start_location, end_location]
+        )
+        if not location
+    ]
