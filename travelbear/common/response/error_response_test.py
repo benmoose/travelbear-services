@@ -23,18 +23,16 @@ def test_error_response(status, message):
 
 
 @pytest.mark.parametrize(
-    "status,validation_errors",
-    ((400, None), (401, ["foo is a required field", "bar must be a positive number"])),
+    "validation_errors",
+    ((None), (["foo is a required field", "bar must be a positive number"])),
 )
-def test_validation_error_response(status, validation_errors):
-    response = validation_error_response(
-        status=status, validation_errors=validation_errors
-    )
+def test_validation_error_response(validation_errors):
+    response = validation_error_response(validation_errors=validation_errors)
 
     expected_response_data = {"ok": False}
     if validation_errors is not None:
         expected_response_data.update({"validation_errors": validation_errors})
 
     assert isinstance(response, HttpResponse)
-    assert response.status_code == status
+    assert response.status_code == 400
     assert json.loads(response.content) == expected_response_data

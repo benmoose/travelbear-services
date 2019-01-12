@@ -16,7 +16,7 @@ def create_location_handler(request, trip_id):
 
     event = parse_location_from_request_body(request.body)
     if not event.is_valid:
-        return validation_error_response(validation_errors=event.validation_errors)
+        return validation_error_response(event.validation_errors)
 
     location = persist_location(db_trip, event)
     return success_response(status=201, data=location)
