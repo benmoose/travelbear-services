@@ -1,16 +1,20 @@
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.backends import default_backend
-from django.http import HttpResponse
 from django.test import RequestFactory
 import jwt
 import pytest
 
-from db_layer.user import get_or_create_user
+from db_layer.user import User, get_or_create_user
 from .auth_decorators import require_jwt_auth, AUDIENCE_NAME
 
 
 test_private_key = generate_private_key(65537, 2048, default_backend())
 test_public_key = test_private_key.public_key()
+
+
+def create_user(external_id):
+    user, _ = get_or_create_user(external_id=external_id)
+    return user
 
 
 def make_jwt_token(sub="test-sub", valid=True):
@@ -23,24 +27,14 @@ def make_jwt_token(sub="test-sub", valid=True):
     return jwt.encode(payload, test_private_key, algorithm=algorithm)
 
 
+@require_jwt_auth(public_key=test_public_key)
+def protected_function(request):
+    return request.user
+
+
 @pytest.fixture
 def request_factory():
     return RequestFactory()
-
-
-@pytest.fixture
-def create_user():
-    def _create_user(external_id):
-        user, _ = get_or_create_user(external_id=external_id)
-        return user
-
-    return _create_user
-
-
-@require_jwt_auth(public_key=test_public_key)
-def protected_endpoint(request, expected_user=None):
-    assert request.user == expected_user
-    return HttpResponse()
 
 
 @pytest.mark.parametrize(
@@ -49,26 +43,30 @@ def protected_endpoint(request, expected_user=None):
 )
 def test_require_jwt_auth_not_authenticated(request_factory, authorization):
     request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
-    response = protected_endpoint(request)
+    response = protected_function(request)
     assert response.status_code == 401
 
 
 @pytest.mark.django_db
-def test_require_jwt_auth_authenticated_unknown_user(request_factory, create_user):
-    token = make_jwt_token(sub="test-sub")
-    authorization = f"Bearer: {token.decode()}"
-
-    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
-    result = protected_endpoint(request)
-    assert result.status_code == 404
-
-
-@pytest.mark.django_db
-def test_require_jwt_auth_authenticated(request_factory, create_user):
+def test_require_jwt_auth_authenticated(request_factory):
     user = create_user(external_id="test-sub")
     token = make_jwt_token(sub="test-sub")
     authorization = f"Bearer: {token.decode()}"
 
+    assert len(User.objects.all()) == 1
     request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
-    result = protected_endpoint(request, expected_user=user)
-    assert result.status_code == 200
+    request_user = protected_function(request)
+    assert len(User.objects.all()) == 1
+    assert request_user == user
+
+
+@pytest.mark.django_db
+def test_user_created_if_not_in_db(request_factory):
+    token = make_jwt_token(sub="test-sub")
+    authorization = f"Bearer: {token.decode()}"
+
+    assert len(User.objects.all()) == 0
+    request = request_factory.get("/", HTTP_AUTHORIZATION=authorization)
+    request_user = protected_function(request)
+    assert len(User.objects.all()) == 1
+    assert User.objects.get(external_id="test-sub") == request_user
