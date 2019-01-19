@@ -14,11 +14,16 @@ Installation instructions are at [docs.docker.com/install](https://docs.docker.c
 
 #### Scripts
 
-Some useful scripts are defined in `Makefile`.
+The test suite can be run with `./run-tests.sh`.
+```py
+# to run a specific package or module
+./run-tests.sh api_public.auth
+# to run a specific test
+./run-tests.sh api_public.auth.auth_decorators_test::test_require_jwt_auth_authenticated
+```
 
- - `make test` runs the test suite.
-To test a specific package specify it with `pkg`.
-e.g. `make test pkg=api_public.auth`.
+Other useful scripts are defined in `Makefile`.
+
  - `make lint` lints your code for you, be sure to do this before pushing to GitHub as CircleCI
 rejects unlinted code.
  - `make ssh` starts a shell on the local server so you can execute arbitrary commands.

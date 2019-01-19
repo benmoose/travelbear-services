@@ -11,7 +11,7 @@ from jwt.exceptions import InvalidTokenError
 
 from common.response import error_response
 from common.request import get_authorization_header
-from db_layer.user import get_user_by_external_id
+from db_layer.user import get_or_create_user
 
 
 logger = logging.getLogger(__name__)
@@ -50,16 +50,15 @@ def require_jwt_auth(_func=None, *, public_key=None):
                 claims = decode(
                     token, public_key, algorithms="RS256", audience=AUDIENCE_NAME
                 )
-                user = get_user_by_external_id(claims["sub"])
+                user, created = get_or_create_user(claims["sub"])
             except (InvalidTokenError, KeyError) as e:
                 logger.info("Failed to decode authorization token: %s", e)
                 return error_response(status=401, message="Invalid authorization token")
 
-            if user is None:
+            if created:
                 logger.info(
-                    "Got request for unknown user with external_id %s", claims["sub"]
+                    "First time user with external_id '%s' has authenticated", claims["sub"]
                 )
-                return error_response(status=404)
 
             request.user = user
             return func(request, *args, **kwargs)
@@ -91,7 +90,8 @@ def get_user_from_test_user_header(request_headers):
     mock_user_sub = request_headers.get(TEST_ENVIRONMENT_TEST_USER_SUB_HEADER)
     if mock_user_sub is None:
         return None
-    return get_user_by_external_id(mock_user_sub)
+    user, _ = get_or_create_user(mock_user_sub)
+    return user
 
 
 def get_token_from_authorization_header(authorization_header):
