@@ -4,9 +4,10 @@ from pathlib import Path
 
 from cryptography.x509 import load_pem_x509_certificate
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from django.conf import settings
 from jwt import decode
-from jwt.exceptions import DecodeError
+from jwt.exceptions import InvalidTokenError
 
 from common.response import error_response
 from common.request import get_authorization_header
@@ -20,14 +21,12 @@ CERTIFICATE_FILE_PATH = Path(__file__).parent / CERTIFICATE_NAME
 
 TEST_ENVIRONMENT_TEST_USER_SUB_HEADER = "HTTP_TEST_USER_EXTERNAL_ID"
 
-
-class UnknownUser(ValueError):
-    pass
+AUDIENCE_NAME = getattr(settings, "API_AUDIENCE_NAME")
 
 
 def require_jwt_auth(_func=None, *, public_key=None):
     if public_key is None:
-        public_key = get_public_key_from_certificate_file()
+        public_key = get_public_key_from_certificate_file(CERTIFICATE_FILE_PATH)
 
     def decorator_require_jwt_auth(func):
         @functools.wraps(func)
@@ -42,16 +41,24 @@ def require_jwt_auth(_func=None, *, public_key=None):
             auth_header = get_authorization_header(request)
             if auth_header is None:
                 return error_response(
-                    status=401, message="missing authorization header"
+                    status=401, message="Missing authorization header"
                 )
 
             token = get_token_from_authorization_header(auth_header)
 
             try:
-                user = get_user_from_jwt_token(token, public_key)
-            except DecodeError:
+                claims = decode(
+                    token, public_key, algorithms="RS256", audience=AUDIENCE_NAME
+                )
+                user = get_user_by_external_id(claims["sub"])
+            except (InvalidTokenError, KeyError) as e:
+                logger.info("Failed to decode authorization token: %s", e)
                 return error_response(status=401, message="Invalid authorization token")
-            except UnknownUser:
+
+            if user is None:
+                logger.info(
+                    "Got request for unknown user with external_id %s", claims["sub"]
+                )
                 return error_response(status=404)
 
             request.user = user
@@ -65,27 +72,19 @@ def require_jwt_auth(_func=None, *, public_key=None):
         return decorator_require_jwt_auth(_func)
 
 
-def get_public_key_from_certificate_file(certificate_file=None):
-    certificate_file = certificate_file or CERTIFICATE_FILE_PATH
+def get_public_key_from_certificate_file(certificate_file):
     certificate = read_certificate_from_file(certificate_file)
-    return certificate.public_key
+    public_key = certificate.public_key()
+    return public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
 
 
 def read_certificate_from_file(certificate_file):
-    with open(certificate_file) as f:
-        certificate = f.read().encode()
+    with open(certificate_file, "rb") as f:
+        certificate = f.read()
         return load_pem_x509_certificate(certificate, default_backend())
-
-
-def get_user_from_jwt_token(jwt_token, public_key):
-    claims = decode(jwt_token, public_key, algorithms="RS256")
-    user = get_user_by_external_id(external_id=claims["sub"])
-    if user is None:
-        logger.warning(
-            "Received request from unknown user with external-id %s", claims["sub"]
-        )
-        raise UnknownUser
-    return user
 
 
 def get_user_from_test_user_header(request_headers):

@@ -30,6 +30,8 @@ DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
 SECRET_KEY = os.getenv(
     "SECRET_KEY", "DEVKEY^0pu&rp0el9zzx*xb39bu=vo7qlgyx3m%&dariuwa3o_"
 )
+API_AUDIENCE_NAME = os.getenv("AUTH0_API_AUDIENCE", "https://travelbear.io/api")
+DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
 
 
 DEBUG = IS_DEV_ENVIRONMENT
@@ -55,7 +57,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -80,6 +82,27 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "django_conf.wsgi.application"
+
+
+# Logging
+# https://docs.djangoproject.com/en/2.1/topics/logging/
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": ["console"],
+            "level": DJANGO_LOG_LEVEL,
+            "propagate": True,
+        },
+    },
+}
 
 
 # Database
