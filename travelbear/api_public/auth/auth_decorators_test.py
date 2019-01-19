@@ -6,7 +6,7 @@ import jwt
 import pytest
 
 from db_layer.user import get_or_create_user
-from .auth_decorators import require_jwt_auth
+from .auth_decorators import require_jwt_auth, AUDIENCE_NAME
 
 
 test_private_key = generate_private_key(65537, 2048, default_backend())
@@ -14,7 +14,7 @@ test_public_key = test_private_key.public_key()
 
 
 def make_jwt_token(sub="test-sub", valid=True):
-    payload = {"sub": sub}
+    payload = {"sub": sub, "aud": AUDIENCE_NAME}
     algorithm = "RS256"
     if not valid:
         return jwt.encode(

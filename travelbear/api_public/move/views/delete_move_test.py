@@ -65,10 +65,7 @@ def test_delete_move_that_does_not_exist(user, call_endpoint):
 @pytest.mark.django_db
 def test_delete_move(user, call_endpoint, move):
     move_id = move.move_id
-    response = call_endpoint(
-        user=user,
-        move_id=move_id,
-    )
+    response = call_endpoint(user=user, move_id=move_id)
     assert response.status_code == 204
     move.refresh_from_db()
     assert move.is_deleted
@@ -82,10 +79,7 @@ def test_delete_other_users_move(user, call_endpoint):
     someone_elses_location_2 = create_location(someone_elses_trip, "bar", 51, 0)
     someone_elses_move = create_move(someone_elses_location_1, someone_elses_location_2)
 
-    response = call_endpoint(
-        user=user,
-        move_id=someone_elses_move.move_id,
-    )
+    response = call_endpoint(user=user, move_id=someone_elses_move.move_id)
     assert response.status_code == 404
     someone_elses_move.refresh_from_db()
     assert someone_elses_move.is_deleted is False
