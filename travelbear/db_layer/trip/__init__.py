@@ -1,5 +1,6 @@
 from .models.location import Location
 from .models.trip import Trip
+from .models.trip_member import TripMember
 from .models.move import Move
 
 from .interface.location_layer import (
