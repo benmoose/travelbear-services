@@ -3,12 +3,15 @@ from django.db.models import Q, Prefetch
 
 from db_layer.trip import Trip, Location
 from db_layer.utils import get_fields_to_update
+from .trip_member_layer import add_member_to_trip
 
 
 def create_trip(created_by, title, description="", tags=None):
-    return Trip.objects.create(
+    trip = Trip.objects.create(
         created_by=created_by, title=title, description=description, tags=tags
     )
+    add_member_to_trip(created_by, trip, is_admin=True)
+    return trip
 
 
 def delete_trip(user, trip):
@@ -24,7 +27,7 @@ def delete_trip(user, trip):
         return None
 
 
-def list_trips_for_user(user, include_deleted=False, ascending=False):
+def list_trips_created_by_user(user, include_deleted=False, ascending=False):
     query = Q(created_by=user)
 
     if not include_deleted:

@@ -5,12 +5,13 @@ from uuid import uuid4
 
 from db_layer.user import get_or_create_user
 from db_layer.utils import UpdateNotAllowed
-from ..models.trip import Trip
-from .location_layer import create_location
-from .trip_layer import (
+from db_layer.trip import (
+    Trip,
+    TripMember,
     create_trip,
+    create_location,
     delete_trip,
-    list_trips_for_user,
+    list_trips_created_by_user,
     get_trip_by_id,
     update_trip,
 )
@@ -30,13 +31,20 @@ def test_create_trip(create_user):
     user = create_user("foo")
 
     assert 0 == len(Trip.objects.all())
+    assert 0 == len(TripMember.objects.all())
     trip = create_trip(user, title="test trip")
     assert 1 == len(Trip.objects.all())
+    assert 1 == len(TripMember.objects.all())
 
     trip_in_db = Trip.objects.all()[0]
     assert trip == trip_in_db
     assert trip.created_by == trip_in_db.created_by  # only compares pk
     assert trip.title == trip_in_db.title
+
+    trip_member_in_db = TripMember.objects.all()[0]
+    assert trip_member_in_db.user == user
+    assert trip_member_in_db.trip == trip_in_db
+    assert trip_member_in_db.is_admin
 
 
 @pytest.mark.django_db
@@ -69,15 +77,17 @@ def test_list_trips_for_user(create_user):
     trip_2 = create_trip(user_1, title="trip 2")
     trip_2.save_with_times(created_on=datetime(2018, 1, 2, tzinfo=pytz.UTC))
 
-    trips = list_trips_for_user(user=user_1)
+    trips = list_trips_created_by_user(user=user_1)
     assert trips == [trip_2, trip_1]
-    trips = list_trips_for_user(user=user_1, ascending=True)
+    trips = list_trips_created_by_user(user=user_1, ascending=True)
     assert trips == [trip_1, trip_2]
 
     trip_1.is_deleted = True
     trip_1.save()
-    assert [trip_2] == list_trips_for_user(user=user_1)
-    assert [trip_2, trip_1] == list_trips_for_user(user=user_1, include_deleted=True)
+    assert [trip_2] == list_trips_created_by_user(user=user_1)
+    assert [trip_2, trip_1] == list_trips_created_by_user(
+        user=user_1, include_deleted=True
+    )
 
 
 @pytest.mark.django_db
