@@ -57,7 +57,8 @@ def require_jwt_auth(_func=None, *, public_key=None):
 
             if created:
                 logger.info(
-                    "First time user with external_id '%s' has authenticated", claims["sub"]
+                    "First time user with external_id '%s' has authenticated",
+                    claims["sub"],
                 )
 
             request.user = user
