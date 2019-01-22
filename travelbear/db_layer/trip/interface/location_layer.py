@@ -1,7 +1,6 @@
 from django.db import transaction
-from django.db.models import Prefetch
 
-from db_layer.trip import Location, Move
+from db_layer.trip import Location
 from db_layer.utils import get_fields_to_update
 
 
