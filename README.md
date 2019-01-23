@@ -9,7 +9,7 @@ Docker is required for local development.
 Installation instructions are at [docs.docker.com/install](https://docs.docker.com/install/). 
 
  1. Clone this repo and `cd` into it.
- 2. Check everything is working correctly by running the test suite: `make test`.
+ 2. Check everything is working correctly by running the test suite: `./run-tests.sh`.
  3. Run the server locally with `make dev`
 
 #### Scripts
