@@ -24,8 +24,8 @@ The test suite can be run with `./run-tests.sh`.
 
 Other useful scripts are defined in `Makefile`.
 
- - `make lint` lints your code for you, be sure to do this before pushing to GitHub as CircleCI
-rejects unlinted code.
+ - `make fmt` formats your code for you (following the [Black code style](https://black.readthedocs.io/en/stable/the_black_code_style.html)).
+    Be sure to do this before pushing to GitHub as CircleCI rejects unformatted code.
  - `make ssh` starts a shell on the local server so you can execute arbitrary commands.
 This is useful for running Django management commands.
  - `make dev` runs the Django app locally at http://127.0.0.1:8080.
