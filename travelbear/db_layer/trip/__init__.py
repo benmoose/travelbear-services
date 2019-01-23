@@ -12,7 +12,7 @@ from .interface.location_layer import (
 from .interface.trip_layer import (
     create_trip,
     delete_trip,
-    list_trips_created_by_user,
+    get_trips_created_by_user,
     get_trip_by_id,
     update_trip,
 )

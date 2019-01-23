@@ -72,20 +72,26 @@ def test_get_members_of_trip(trip_owner, trip):
     assert {trip_owner, member_1, member_2} == set(members_of_trip)
 
 
-@pytest.fixture
-def test_get_trips_for_user(time):
+@pytest.mark.django_db
+def test_get_trips_for_user(time, django_assert_num_queries):
     one_h_ago = time - timedelta(hours=1)
     two_h_ago = time - timedelta(hours=2)
 
     user_1, _ = get_or_create_user("user-1")
-    trip_1 = create_trip_at_time(user_1, one_h_ago)
-    trip_2 = create_trip_at_time(user_1, two_h_ago)
+    user_2, _ = get_or_create_user("user-2")
+
+    trip_1 = create_trip_at_time(user_1, one_h_ago, title="trip-1")
+    trip_2 = create_trip_at_time(user_2, two_h_ago, title="trip-2")
+    create_trip_at_time(user_2, two_h_ago, title="trip-3", is_deleted=True)
+    add_member_to_trip(user_1, trip_2)
+
+    with django_assert_num_queries(2):
+        get_trips_for_user(user_1)
 
     assert [trip_1, trip_2] == get_trips_for_user(user_1, ascending=False)
     assert [trip_2, trip_1] == get_trips_for_user(user_1, ascending=True)
 
-    user_2, _ = get_or_create_user("user-2")
-    assert [] == get_trips_for_user(user_2)
+    assert [trip_2] == get_trips_for_user(user_2)
 
 
 @pytest.mark.django_db
@@ -96,8 +102,9 @@ def test_is_user_member_of_trip(trip_owner, trip):
     assert is_user_member_of_trip(somebody, trip) is False
 
 
-def create_trip_at_time(user, created_on):
-    trip = create_trip(user, "test-trip")
+def create_trip_at_time(user, created_on, title="test-trip", is_deleted=False):
+    trip = create_trip(user, title)
     trip.created_on = created_on
+    trip.is_deleted = is_deleted
     trip.save()
     return trip

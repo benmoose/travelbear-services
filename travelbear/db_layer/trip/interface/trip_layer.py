@@ -27,7 +27,7 @@ def delete_trip(user, trip):
         return None
 
 
-def list_trips_created_by_user(user, include_deleted=False, ascending=False):
+def get_trips_created_by_user(user, include_deleted=False, ascending=False):
     query = Q(created_by=user)
 
     if not include_deleted:

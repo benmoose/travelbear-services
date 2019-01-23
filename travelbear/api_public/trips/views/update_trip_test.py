@@ -57,7 +57,6 @@ def test_update_trip(call_endpoint, trip):
         "title": "new title",
         "description": "some desc",
         "tags": ["camping", "mountains"],
-        "is_deleted": False,
     }
 
     response = call_endpoint(

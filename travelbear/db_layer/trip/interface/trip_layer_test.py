@@ -11,7 +11,7 @@ from db_layer.trip import (
     create_trip,
     create_location,
     delete_trip,
-    list_trips_created_by_user,
+    get_trips_created_by_user,
     get_trip_by_id,
     update_trip,
 )
@@ -66,7 +66,7 @@ def test_delete_trip(create_user):
 
 
 @pytest.mark.django_db
-def test_list_trips_for_user(create_user):
+def test_get_trips_for_user(create_user):
     user_1 = create_user("1")
     someone_else = create_user("2")
 
@@ -77,15 +77,15 @@ def test_list_trips_for_user(create_user):
     trip_2 = create_trip(user_1, title="trip 2")
     trip_2.save_with_times(created_on=datetime(2018, 1, 2, tzinfo=pytz.UTC))
 
-    trips = list_trips_created_by_user(user=user_1)
+    trips = get_trips_created_by_user(user=user_1)
     assert trips == [trip_2, trip_1]
-    trips = list_trips_created_by_user(user=user_1, ascending=True)
+    trips = get_trips_created_by_user(user=user_1, ascending=True)
     assert trips == [trip_1, trip_2]
 
     trip_1.is_deleted = True
     trip_1.save()
-    assert [trip_2] == list_trips_created_by_user(user=user_1)
-    assert [trip_2, trip_1] == list_trips_created_by_user(
+    assert [trip_2] == get_trips_created_by_user(user=user_1)
+    assert [trip_2, trip_1] == get_trips_created_by_user(
         user=user_1, include_deleted=True
     )
 
