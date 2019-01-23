@@ -18,5 +18,13 @@ def get_members_of_trip(trip):
     return list(TripMember.objects.filter(trip=trip))
 
 
+def get_trips_for_user(user, ascending=False):
+    return list(
+        TripMember.objects.filter(user=user).order_by(
+            "created_on" if ascending else "-created_on"
+        )
+    )
+
+
 def is_user_member_of_trip(user, trip):
     return TripMember.objects.filter(user=user, trip=trip).exists()

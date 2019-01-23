@@ -16,5 +16,9 @@ from .interface.trip_layer import (
     get_trip_by_id,
     update_trip,
 )
-from .interface.trip_member_layer import add_member_to_trip
+from .interface.trip_member_layer import (
+    add_member_to_trip,
+    get_trips_for_user,
+    get_members_of_trip,
+)
 from .interface.move_layer import create_move, delete_move, get_move_by_move_id

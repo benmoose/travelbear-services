@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta
 import pytest
+import pytz
 
 from db_layer.trip import TripMember, create_trip
 from db_layer.user import get_or_create_user
@@ -6,8 +8,14 @@ from .trip_member_layer import (
     UserIsAlreadyMember,
     add_member_to_trip,
     get_members_of_trip,
+    get_trips_for_user,
     is_user_member_of_trip,
 )
+
+
+@pytest.fixture
+def time():
+    return datetime(2019, 1, 1, tzinfo=pytz.UTC)
 
 
 @pytest.fixture
@@ -51,17 +59,33 @@ def test_add_duplicate_member_to_trip(trip):
 def test_get_members_of_trip(trip_owner, trip):
     member_1, _ = get_or_create_user("member-1")
     member_2, _ = get_or_create_user("member-2")
-    not_a_member, _ = get_or_create_user("not-member-1")
+    member_3, _ = get_or_create_user("member-of-another-trip")
+
+    other_trip = create_trip(trip_owner, "other-trip")
+    add_member_to_trip(member_3, other_trip)
 
     add_member_to_trip(member_1, trip)
     add_member_to_trip(member_2, trip)
 
     members_of_trip = [member.user for member in get_members_of_trip(trip)]
     assert 3 == len(members_of_trip)
-    assert trip_owner in members_of_trip
-    assert member_1 in members_of_trip
-    assert member_2 in members_of_trip
-    assert not_a_member not in members_of_trip
+    assert {trip_owner, member_1, member_2} == set(members_of_trip)
+
+
+@pytest.fixture
+def test_get_trips_for_user(time):
+    one_h_ago = time - timedelta(hours=1)
+    two_h_ago = time - timedelta(hours=2)
+
+    user_1, _ = get_or_create_user("user-1")
+    trip_1 = create_trip_at_time(user_1, one_h_ago)
+    trip_2 = create_trip_at_time(user_1, two_h_ago)
+
+    assert [trip_1, trip_2] == get_trips_for_user(user_1, ascending=False)
+    assert [trip_2, trip_1] == get_trips_for_user(user_1, ascending=True)
+
+    user_2, _ = get_or_create_user("user-2")
+    assert [] == get_trips_for_user(user_2)
 
 
 @pytest.mark.django_db
@@ -70,3 +94,10 @@ def test_is_user_member_of_trip(trip_owner, trip):
 
     assert is_user_member_of_trip(trip_owner, trip) is True
     assert is_user_member_of_trip(somebody, trip) is False
+
+
+def create_trip_at_time(user, created_on):
+    trip = create_trip(user, "test-trip")
+    trip.created_on = created_on
+    trip.save()
+    return trip

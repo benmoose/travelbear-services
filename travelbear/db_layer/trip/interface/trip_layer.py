@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.db.models import Q, Prefetch
 
-from db_layer.trip import Trip, Location
+from db_layer.trip import Trip, TripMember, Location
 from db_layer.utils import get_fields_to_update
 from .trip_member_layer import add_member_to_trip
 
