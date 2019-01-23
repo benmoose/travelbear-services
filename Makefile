@@ -1,12 +1,16 @@
-.PHONY: dev prod test lint ssh
+.PHONY: dev prod build lint ssh psql
 
 dev:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
-		up
+		up --remove-orphans
 
 prod:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
-		up
+	docker-compose -f docker-compose.prod.yml -f docker-compose.yml \
+		up --remove-orphans
+
+build:
+	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
+		build
 
 lint:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
@@ -16,3 +20,6 @@ lint:
 ssh:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
 		run --rm server bash
+
+psql:
+	docker-compose exec -u postgres db psql
