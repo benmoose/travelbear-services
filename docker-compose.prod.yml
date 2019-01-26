@@ -8,7 +8,7 @@ services:
     environment:
       - stack=production
     volumes:
-      - .:/www
+      - .:/usr/src/app
     ports:
       - "8000:8000"
 

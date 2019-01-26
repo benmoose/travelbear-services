@@ -1,4 +1,4 @@
-.PHONY: dev prod build lint ssh psql
+.PHONY: dev prod build-dev build-prod lint ssh psql
 
 dev:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
@@ -8,8 +8,12 @@ prod:
 	docker-compose -f docker-compose.prod.yml -f docker-compose.yml \
 		up --remove-orphans
 
-build:
+build-dev:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
+		build
+
+build-prod:
+	docker-compose -f docker-compose.prod.yml -f docker-compose.yml \
 		build
 
 fmt:
