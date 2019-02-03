@@ -2,7 +2,7 @@ from .models.location import Location
 from .models.trip import Trip
 from .models.trip_member import TripMember
 from .models.move import Move
-from .models.point_of_interest import PointOfInterest
+from .models.place import Place
 
 from .interface.location_layer import (
     create_location,
