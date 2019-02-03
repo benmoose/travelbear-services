@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from common.test import count_models_in_db, no_models_in_db
 from db_layer.user import get_or_create_user
-from db_layer.utils import UpdateNotAllowed
+from db_layer.helpers import UpdateNotAllowed
 from db_layer.trip import (
     Trip,
     TripMember,
@@ -169,7 +169,7 @@ def test_update_other_users_trip():
     someone_else, _ = get_or_create_user("bar")
     trip = create_trip(user, title="unspoilt")
 
-    with pytest.raises(Exception):
+    with pytest.raises(PermissionError):
         update_trip(someone_else, trip, title="mwahaha")
 
     trip.refresh_from_db()

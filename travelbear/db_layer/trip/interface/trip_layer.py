@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.models import Q, Prefetch
 
 from db_layer.trip import Trip, Location
-from db_layer.utils import get_fields_to_update
+from db_layer.helpers import update_object
 from ..helpers.user_trips import user_trips_qs
 from .trip_member_layer import add_member_to_trip
 
@@ -54,10 +54,6 @@ def get_trip_by_id(user, trip_id):
 
 def update_trip(user, trip, **kwargs):
     updateable_fields = {"title", "description", "tags"}
-    fields_to_update = get_fields_to_update(updateable_fields, kwargs.keys())
-    with transaction.atomic():
-        trip = user_trips_qs(user).select_for_update().get(pk=trip.pk)
-        for field in fields_to_update:
-            setattr(trip, field, kwargs.get(field))
-        trip.save(update_fields=[*fields_to_update, "modified_on"])
-    return trip
+    if trip not in list(user_trips_qs(user)):
+        raise PermissionError
+    return update_object(trip, updateable_fields, **kwargs)

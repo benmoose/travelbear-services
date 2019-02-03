@@ -5,7 +5,7 @@ import pytest
 
 from db_layer.trip import Location
 from db_layer.user import get_or_create_user
-from db_layer.utils import UpdateNotAllowed
+from db_layer.helpers import UpdateNotAllowed
 from .trip_layer import create_trip
 from .location_layer import (
     create_location,
