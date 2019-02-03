@@ -3,11 +3,13 @@ import pytest
 import pytz
 from uuid import uuid4
 
+from common.test import count_models_in_db, no_models_in_db
 from db_layer.user import get_or_create_user
 from db_layer.utils import UpdateNotAllowed
 from db_layer.trip import (
     Trip,
     TripMember,
+    add_member_to_trip,
     create_trip,
     create_location,
     delete_trip,
@@ -17,24 +19,15 @@ from db_layer.trip import (
 )
 
 
-@pytest.fixture
-def create_user():
-    def _create_user(external_id):
-        user, _ = get_or_create_user(external_id, f"{external_id}@test.com")
-        return user
-
-    return _create_user
-
-
 @pytest.mark.django_db
-def test_create_trip(create_user):
-    user = create_user("foo")
+def test_create_trip():
+    user, _ = get_or_create_user("foo")
 
-    assert 0 == len(Trip.objects.all())
-    assert 0 == len(TripMember.objects.all())
+    assert no_models_in_db(Trip)
+    assert no_models_in_db(TripMember)
     trip = create_trip(user, title="test trip")
-    assert 1 == len(Trip.objects.all())
-    assert 1 == len(TripMember.objects.all())
+    assert 1 == count_models_in_db(Trip)
+    assert 1 == count_models_in_db(TripMember)
 
     trip_in_db = Trip.objects.all()[0]
     assert trip == trip_in_db
@@ -48,27 +41,33 @@ def test_create_trip(create_user):
 
 
 @pytest.mark.django_db
-def test_delete_trip(create_user):
-    user = create_user("test-user")
-    someone_else = create_user("someone-else")
-
+def test_delete_trip():
+    user, _ = get_or_create_user("trip-owner")
     trip = create_trip(user, title="test trip")
     assert not trip.is_deleted
 
-    assert delete_trip(someone_else, trip) is None
+    unrelated_user, _ = get_or_create_user("unrelated-user")
+    assert delete_trip(unrelated_user, trip) is False
+    trip.refresh_from_db()
+    assert not trip.is_deleted
 
-    returned_trip = delete_trip(user, trip)
+    trip_member, _ = get_or_create_user("trip-member")
+    add_member_to_trip(trip_member, trip)
+    assert delete_trip(trip_member, trip) is False
+    trip.refresh_from_db()
+    assert not trip.is_deleted
 
-    assert returned_trip.pk == trip.pk
-    assert returned_trip.is_deleted
+    success = delete_trip(user, trip)
+
+    assert success
     trip.refresh_from_db()
     assert trip.is_deleted
 
 
 @pytest.mark.django_db
-def test_get_trips_for_user(create_user):
-    user_1 = create_user("1")
-    someone_else = create_user("2")
+def test_get_trips_for_user():
+    user_1, _ = get_or_create_user("1")
+    someone_else, _ = get_or_create_user("2")
 
     _ = create_trip(someone_else, title="other secret trip we shouldn't see")
 
@@ -91,25 +90,29 @@ def test_get_trips_for_user(create_user):
 
 
 @pytest.mark.django_db
-def test_get_trip_by_id(django_assert_num_queries, create_user):
-    user = create_user("test-user")
-    trip = create_trip(user, "test trip")
+def test_get_trip_by_id(django_assert_num_queries):
+    trip_owner, _ = get_or_create_user("trip-owner")
+    trip = create_trip(trip_owner, "test trip")
     location = create_location(trip, "location", lat=4, lng=2)
 
-    with django_assert_num_queries(2):
-        trip = get_trip_by_id(user, trip.trip_id)
-        assert trip.title == "test trip"
-        assert trip.locations == [location]
+    trip_member, _ = get_or_create_user("trip-member")
+    add_member_to_trip(trip_member, trip)
 
-    assert get_trip_by_id(user, uuid4()) is None
+    for user in [trip_owner, trip_member]:
+        with django_assert_num_queries(2):
+            retrieved_trip = get_trip_by_id(user, trip.trip_id)
+            assert retrieved_trip.pk == trip.pk
+            assert retrieved_trip.locations == [location]
 
-    someone_else = create_user("someone-else")
+    assert get_trip_by_id(trip_owner, str(uuid4())) is None
+
+    someone_else, _ = get_or_create_user("someone-else")
     assert get_trip_by_id(someone_else, uuid4()) is None
 
 
 @pytest.mark.django_db
-def test_update_trip(create_user):
-    user = create_user("foo")
+def test_update_trip():
+    user, _ = get_or_create_user("foo")
     original_trip = create_trip(
         user, title="bad title", description="bad desc", tags=["a", "b"]
     )
@@ -136,8 +139,22 @@ def test_update_trip(create_user):
 
 
 @pytest.mark.django_db
-def test_update_trip_not_allowed_fields(create_user):
-    user = create_user("foo")
+def test_update_trip_member_of():
+    trip_owner, _ = get_or_create_user("foo")
+    trip_member, _ = get_or_create_user("bar")
+    trip = create_trip(
+        trip_owner, title="trip 1"
+    )
+    add_member_to_trip(trip_member, trip)
+
+    update_trip(trip_member, trip, title="another name")
+    trip.refresh_from_db()
+    assert trip.title == "another name"
+
+
+@pytest.mark.django_db
+def test_update_trip_not_allowed_fields():
+    user, _ = get_or_create_user("foo")
     trip = create_trip(user, title="original title")
     with pytest.raises(UpdateNotAllowed):
         update_trip(
@@ -149,9 +166,9 @@ def test_update_trip_not_allowed_fields(create_user):
 
 
 @pytest.mark.django_db
-def test_update_other_users_trip(create_user):
-    user = create_user("foo")
-    someone_else = create_user("bar")
+def test_update_other_users_trip():
+    user, _ = get_or_create_user("foo")
+    someone_else, _ = get_or_create_user("bar")
     trip = create_trip(user, title="unspoilt")
 
     with pytest.raises(Exception):

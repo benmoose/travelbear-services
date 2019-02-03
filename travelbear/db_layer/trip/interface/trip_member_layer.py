@@ -1,5 +1,6 @@
 from django.db import IntegrityError
 
+from ..helpers.user_trips import user_trips_qs
 from ..models.trip_member import TripMember
 
 
@@ -19,12 +20,9 @@ def get_members_of_trip(trip):
 
 
 def get_trips_for_user(user, ascending=False):
-    memberships = (
-        TripMember.objects.filter(user=user, trip__is_deleted=False)
-        .prefetch_related("trip")
-        .order_by("trip__created_on" if ascending else "-trip__created_on")
+    return list(
+        user_trips_qs(user).order_by("created_on" if ascending else "-created_on")
     )
-    return list(membership.trip for membership in memberships)
 
 
 def is_user_member_of_trip(user, trip):

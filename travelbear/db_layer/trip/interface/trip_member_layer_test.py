@@ -85,7 +85,7 @@ def test_get_trips_for_user(time, django_assert_num_queries):
     create_trip_at_time(user_2, two_h_ago, title="trip-3", is_deleted=True)
     add_member_to_trip(user_1, trip_2)
 
-    with django_assert_num_queries(2):
+    with django_assert_num_queries(1):
         get_trips_for_user(user_1)
 
     assert [trip_1, trip_2] == get_trips_for_user(user_1, ascending=False)
