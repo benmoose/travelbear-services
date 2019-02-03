@@ -1,5 +1,5 @@
 -r requirements.txt
 
-pytest>=4.0.0,<5
+pytest>=4.0.0,<4.2.0
 pytest-django>=3.4.4,<4
 black==18.9b0
