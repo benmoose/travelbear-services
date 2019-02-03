@@ -29,4 +29,3 @@ Other useful scripts are defined in `Makefile`.
  - `make ssh` starts a shell on the local server so you can execute arbitrary commands.
 This is useful for running Django management commands.
  - `make dev` runs the Django app locally at http://127.0.0.1:8080.
- - `make prod` runs the Django app locally at http://127.0.0.1:80.
