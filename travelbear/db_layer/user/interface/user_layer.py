@@ -23,3 +23,11 @@ def get_or_create_user(external_id, email="", full_name="", short_name="", pictu
                 email=email, full_name=full_name, short_name=short_name, picture=picture
             ),
         )
+
+
+def set_user_as_inactive(user: User):
+    pass
+
+
+def set_user_as_active(user: User):
+    pass

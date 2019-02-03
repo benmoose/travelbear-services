@@ -17,3 +17,5 @@ class User(ModelBase):
     full_name = models.TextField(blank=True)
     short_name = models.TextField(blank=True)
     picture = models.URLField(blank=True)
+
+    is_active = models.BooleanField(default=True)
