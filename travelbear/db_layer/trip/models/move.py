@@ -1,14 +1,11 @@
-from uuid import uuid4
 from django.db import models
 
-from db_layer.model_base import ModelBase
+from db_layer.helpers import ModelBase, ExternalIDField
 from .location import Location
 
 
 class Move(ModelBase):
-    move_id = models.UUIDField(
-        default=uuid4, unique=True, db_index=True, editable=False
-    )
+    move_id = ExternalIDField()
 
     start_location = models.ForeignKey(
         Location, on_delete=models.PROTECT, related_name="start_location_for"

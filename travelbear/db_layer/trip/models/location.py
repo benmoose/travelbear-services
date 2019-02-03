@@ -1,15 +1,11 @@
-from uuid import uuid4
-
 from django.db import models
 
-from db_layer.model_base import ModelBase
+from db_layer.helpers import ModelBase, ExternalIDField
 from .trip import Trip
 
 
 class Location(ModelBase):
-    location_id = models.UUIDField(
-        default=uuid4, unique=True, db_index=True, editable=False
-    )
+    location_id = ExternalIDField()
 
     trip = models.ForeignKey(Trip, on_delete=models.PROTECT)
     display_name = models.TextField()

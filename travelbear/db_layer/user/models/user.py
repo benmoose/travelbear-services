@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django.db import models
 
-from db_layer.model_base import ModelBase
+from db_layer.helpers import ModelBase
 
 
 class User(ModelBase):
