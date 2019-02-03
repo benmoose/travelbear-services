@@ -60,5 +60,4 @@ def test_create_trip(call_create_trip_endpoint):
         "title": "title",
         "description": "some description",
         "tags": ["t1", "t2"],
-        "is_deleted": False,
     }

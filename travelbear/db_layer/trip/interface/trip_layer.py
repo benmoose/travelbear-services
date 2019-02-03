@@ -3,6 +3,7 @@ from django.db.models import Q, Prefetch
 
 from db_layer.trip import Trip, Location
 from db_layer.utils import get_fields_to_update
+from ..helpers.user_trips import user_trips_qs
 from .trip_member_layer import add_member_to_trip
 
 
@@ -14,7 +15,7 @@ def create_trip(created_by, title, description="", tags=None):
     return trip
 
 
-def delete_trip(user, trip):
+def delete_trip(user, trip) -> bool:
     try:
         with transaction.atomic():
             trip = Trip.objects.select_for_update().get(created_by=user, pk=trip.pk)
@@ -22,12 +23,12 @@ def delete_trip(user, trip):
                 return trip
             trip.is_deleted = True
             trip.save(update_fields=["is_deleted", "modified_on"])
-        return trip
+        return True
     except Trip.DoesNotExist:
-        return None
+        return False
 
 
-def list_trips_created_by_user(user, include_deleted=False, ascending=False):
+def get_trips_created_by_user(user, include_deleted=False, ascending=False):
     query = Q(created_by=user)
 
     if not include_deleted:
@@ -41,11 +42,12 @@ def list_trips_created_by_user(user, include_deleted=False, ascending=False):
 
 
 def get_trip_by_id(user, trip_id):
+    user_trips = user_trips_qs(user)
     try:
         locations_qs = Location.objects.filter(is_deleted=False)
-        return Trip.objects.prefetch_related(
+        return user_trips.prefetch_related(
             Prefetch("location_set", queryset=locations_qs, to_attr="locations")
-        ).get(created_by=user, trip_id=trip_id)
+        ).get(trip_id=trip_id)
     except Trip.DoesNotExist:
         return None
 
@@ -54,7 +56,7 @@ def update_trip(user, trip, **kwargs):
     updateable_fields = {"title", "description", "tags"}
     fields_to_update = get_fields_to_update(updateable_fields, kwargs.keys())
     with transaction.atomic():
-        trip = Trip.objects.select_for_update().get(created_by=user, pk=trip.pk)
+        trip = user_trips_qs(user).select_for_update().get(pk=trip.pk)
         for field in fields_to_update:
             setattr(trip, field, kwargs.get(field))
         trip.save(update_fields=[*fields_to_update, "modified_on"])

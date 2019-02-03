@@ -1,5 +1,6 @@
 from django.db import IntegrityError
 
+from ..helpers.user_trips import user_trips_qs
 from ..models.trip_member import TripMember
 
 
@@ -15,7 +16,13 @@ def add_member_to_trip(user, trip, is_admin=False):
 
 
 def get_members_of_trip(trip):
-    return list(TripMember.objects.filter(trip=trip))
+    return list(TripMember.objects.filter(trip=trip).prefetch_related("trip"))
+
+
+def get_trips_for_user(user, ascending=False):
+    return list(
+        user_trips_qs(user).order_by("created_on" if ascending else "-created_on")
+    )
 
 
 def is_user_member_of_trip(user, trip):
