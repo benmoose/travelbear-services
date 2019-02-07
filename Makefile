@@ -18,8 +18,7 @@ build-prod:
 
 fmt:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
-		run --rm --no-deps server black \
-		--exclude db_layer/migrations travelbear --exclude django_conf/settings.py
+		run --rm --no-deps server black
 
 ssh:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \

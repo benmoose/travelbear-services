@@ -1,0 +1,16 @@
+[tool.black]
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | \.tox
+    | env
+    | venv
+    | build
+    | dist
+  )/
+  | django_conf/settings.py
+  | db_layer/migrations/
+)
+'''
