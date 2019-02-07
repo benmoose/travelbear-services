@@ -19,9 +19,8 @@ jobs:
     - run:
         name: Run tests
         command: |
-          docker-compose run --rm \
-            -e stack=test server pytest --doctest-modules \
-          	--rootdir travelbear .
+          docker-compose run --rm -e stack=test server \
+            pytest
     - run:
         name: Run linter
         command: |
