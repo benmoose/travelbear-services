@@ -26,8 +26,6 @@ jobs:
         name: Run linter
         command: |
           docker-compose run --rm --no-deps server \
-            black \
-              --exclude db_layer/migrations --exclude django_conf/settings.py \
-              --check travelbear
+            black --check .
     - store_test_results:
         path: test-results
