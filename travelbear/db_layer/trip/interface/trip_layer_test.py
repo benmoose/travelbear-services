@@ -142,9 +142,7 @@ def test_update_trip():
 def test_update_trip_member_of():
     trip_owner, _ = get_or_create_user("foo")
     trip_member, _ = get_or_create_user("bar")
-    trip = create_trip(
-        trip_owner, title="trip 1"
-    )
+    trip = create_trip(trip_owner, title="trip 1")
     add_member_to_trip(trip_member, trip)
 
     update_trip(trip_member, trip, title="another name")
