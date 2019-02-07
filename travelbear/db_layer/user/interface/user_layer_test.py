@@ -1,7 +1,7 @@
 import pytest
 
 from ..models.user import User
-from .user_layer import get_or_create_user
+from .user_layer import get_or_create_user, set_user_as_active, set_user_as_inactive
 
 
 def assert_rows_in_db(expected=0):
@@ -11,11 +11,14 @@ def assert_rows_in_db(expected=0):
 @pytest.mark.django_db
 def test_create_user():
     assert_rows_in_db(0)
-    user, created = get_or_create_user(external_id="id", email="foo@bar.com")
+    user, created = get_or_create_user(external_id="external-id", email="foo@bar.com")
     assert_rows_in_db(1)
     assert created
 
-    assert User.objects.all()[0] == user
+    db_user = User.objects.all()[0]
+    assert db_user == user
+    assert db_user.external_id == "external-id"
+    assert db_user.email == "foo@bar.com"
 
 
 @pytest.mark.django_db
@@ -38,3 +41,35 @@ def test_get_or_create_user():
     user_3, _ = get_or_create_user(external_id="auth0-id-1", email="test@domain.com")
     assert user_3 != user_1
     assert_rows_in_db(2)
+
+
+@pytest.mark.django_db
+def test_set_user_as_inactive():
+    user, _ = get_or_create_user("foo")
+
+    assert user.is_active
+    set_user_as_inactive(user)
+    user.refresh_from_db()
+    assert not user.is_active
+
+    # check idempotency
+    set_user_as_inactive(user)
+    user.refresh_from_db()
+    assert not user.is_active
+
+
+@pytest.mark.django_db
+def test_set_user_as_active():
+    user, _ = get_or_create_user("foo")
+    user.is_active = False
+    user.save()
+
+    assert not user.is_active
+    set_user_as_active(user)
+    user.refresh_from_db()
+    assert user.is_active
+
+    # check idempotency
+    set_user_as_active(user)
+    user.refresh_from_db()
+    assert user.is_active
