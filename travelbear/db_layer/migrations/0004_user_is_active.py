@@ -5,14 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('db_layer', '0003_trip_member'),
-    ]
+    dependencies = [("db_layer", "0003_trip_member")]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_active',
-            field=models.BooleanField(default=True),
-        ),
+            model_name="user", name="is_active", field=models.BooleanField(default=True)
+        )
     ]
