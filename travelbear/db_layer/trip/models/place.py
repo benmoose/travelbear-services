@@ -19,3 +19,5 @@ class Place(ModelBase):
     end_time = models.DateTimeField(null=True, blank=True)
 
     google_place_id = models.CharField(max_length=255, blank=True)
+
+    is_deleted = models.BooleanField(default=False)

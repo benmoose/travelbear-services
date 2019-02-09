@@ -3,7 +3,7 @@ import pytest
 from common.test import count_models_in_db, no_models_in_db
 from db_layer.trip import Place, create_trip, create_location
 from db_layer.user import get_or_create_user
-from .place_layer import create_place
+from .place_layer import create_place, delete_place, update_place
 
 
 @pytest.fixture
@@ -25,5 +25,30 @@ def location(trip):
 @pytest.mark.django_db
 def test_create_place(location):
     assert no_models_in_db(Place)
-    create_place(location, "test place", 51, 0)
+    p = create_place(location, "test place", lat=51, lng=0)
+
+    assert isinstance(p, Place)
     assert 1 == count_models_in_db(Place)
+    assert p.pk == Place.objects.all()[0].pk
+
+
+@pytest.mark.django_db
+def test_delete_place(location):
+    place = create_place(location, "test place", lat=51, lng=0)
+    assert place.is_deleted is False
+
+    delete_place(place)
+    place.refresh_from_db()
+    assert place.is_deleted
+
+
+@pytest.mark.django_db
+def test_update_place(location):
+    place = create_place(location, display_name="test place", lat=51, lng=0)
+    update_place(place, display_name="cool new name", lat=100, is_booked=True)
+
+    place.refresh_from_db()
+    assert place.display_name == "cool new name"
+    assert place.lat == 100
+    assert place.lng == 0
+    assert place.is_booked == True

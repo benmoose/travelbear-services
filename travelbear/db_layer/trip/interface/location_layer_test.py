@@ -94,28 +94,27 @@ def test_get_related_moves(trip):
 
 
 @pytest.mark.django_db
-def test_update_location(user, trip):
-    original_location = create_location(trip, display_name="location 1", lat=51, lng=1)
+def test_update_location(trip):
+    original_location = create_location(
+        trip, display_name="original name", lat=51, lng=1
+    )
     update_1 = update_location(
-        user, original_location, display_name="location 2", lat=52, lng=2
+        original_location,
+        display_name="new name",
+        lat=52,
+        lng=2,
+        google_place_id="new field",
     )
 
     assert original_location.pk == update_1.pk
-    assert update_1.display_name == "location 2"
+    assert update_1.display_name == "new name"
+    assert update_1.google_place_id == "new field"
     assert update_1.lat == 52
     assert update_1.lng == 2
 
-    update_2 = update_location(user, update_1, lng=3)
-    assert update_1.pk == update_2.pk
-    assert update_2.display_name == "location 2"
-    assert update_2.lat == 52
-    assert update_2.lng == 3
-
-    assert 1 == len(Location.objects.all())
-
 
 @pytest.mark.django_db
-def test_update_location_not_allowed_fields(user, trip):
+def test_update_location_not_allowed_fields(trip):
     location = create_location(trip, display_name="location", lat=51, lng=1)
     with pytest.raises(UpdateNotAllowed):
-        update_location(user, location, is_deleted=True)
+        update_location(location, is_deleted=True)
