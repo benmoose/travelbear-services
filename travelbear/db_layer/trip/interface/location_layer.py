@@ -1,7 +1,7 @@
 from django.db import transaction
 
+from db_layer.helpers import update_object
 from db_layer.trip import Location
-from db_layer.utils import get_fields_to_update
 
 
 def get_user_locations_qs(user):
@@ -43,14 +43,6 @@ def get_moves_ending_at_location(location):
     return list(location.end_location_for.all())
 
 
-def update_location(user, location, **kwargs):
+def update_location(location, **kwargs):
     updateable_fields = {"display_name", "lat", "lng", "google_place_id"}
-    fields_to_update = get_fields_to_update(updateable_fields, kwargs.keys())
-    with transaction.atomic():
-        location = Location.objects.select_for_update().get(
-            trip__created_by=user, pk=location.pk
-        )
-        for field in fields_to_update:
-            setattr(location, field, kwargs.get(field))
-        location.save(update_fields=[*fields_to_update, "modified_on"])
-    return location
+    return update_object(location, updateable_fields, **kwargs)
