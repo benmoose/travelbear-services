@@ -18,3 +18,4 @@ from .interface.trip_member_layer import (
     get_members_of_trip,
     get_trips_for_user,
 )
+from .interface.place_layer import create_place
