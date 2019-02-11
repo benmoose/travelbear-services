@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import create_location, handlers, update_location, itinerary
+from .views import create_location, handlers, itinerary, update_location
 
 urlpatterns = [
     path("", handlers.root_endpoint),

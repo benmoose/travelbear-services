@@ -4,7 +4,7 @@ from api_public.auth import require_jwt_auth
 from common.parse import safe_parse_json
 from common.response import error_response, success_response, validation_error_response
 from db_layer.helpers import UpdateNotAllowed
-from db_layer.trip import get_trip_by_id, update_location, get_locations_for_trip
+from db_layer.trip import get_locations_for_trip, get_trip_by_id, update_location
 
 from ..models import Location
 

@@ -1,8 +1,9 @@
+import pytest
 from django.test import Client
 from django.urls import reverse
-import pytest
 
 from db_layer.user import get_or_create_user
+
 from .itinerary import itinerary_handler
 
 

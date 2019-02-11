@@ -15,7 +15,6 @@ class Place(ModelBase):
     display_address = models.TextField(blank=True)
     lat = models.DecimalField(max_digits=9, decimal_places=6)
     lng = models.DecimalField(max_digits=9, decimal_places=6)
-    is_booked = models.BooleanField(default=False)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
 

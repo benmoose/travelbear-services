@@ -17,4 +17,4 @@ def itinerary_handler(request, trip_id):
 
 
 def get_itinerary_for_trip(user, trip):
-    raise NotImplemented
+    raise NotImplementedError
