@@ -13,3 +13,6 @@ Whilst there is a case for enforcing permissions at the DB layer (and in some ca
 interfaces should avoid implementing complex logic and stay small and focused.
 Interface methods should rely on the caller to implement permission checking logic and and remain simple and focused.
 This approach will help to keep the API surface small and access to the database generic.
+
+Interfaces should, however, take care to implement integrity logic (such as start < end)
+and raise errors upon receiving nonsensical input.

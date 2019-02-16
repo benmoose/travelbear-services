@@ -1,11 +1,21 @@
+from typing import List
+
 from django.db import transaction
 
-from ..models import Move
+from db_layer.helpers import InvalidArguments
+
+from ..models import Location, Move
 
 
 def create_move(
     start_location, end_location, travel_method="", depart_time=None, arrive_time=None
 ):
+    if (
+        depart_time is not None
+        and arrive_time is not None
+        and arrive_time <= depart_time
+    ):
+        raise InvalidArguments("depart_time must come before arrive_time")
     return Move.objects.create(
         start_location=start_location,
         end_location=end_location,
@@ -32,3 +42,7 @@ def get_move_by_move_id(user, move_id):
         )
     except Move.DoesNotExist:
         return None
+
+
+def get_moves_departing_from_location(location: Location) -> List[Move]:
+    return list(Move.objects.filter(start_location=location, is_deleted=False))

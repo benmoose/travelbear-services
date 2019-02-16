@@ -3,9 +3,16 @@ from .interface.location_layer import (
     delete_location,
     get_location_by_id,
     get_locations_for_trip,
+    get_places_for_location,
     update_location,
 )
-from .interface.move_layer import create_move, delete_move, get_move_by_move_id
+from .interface.move_layer import (
+    create_move,
+    delete_move,
+    get_move_by_move_id,
+    get_moves_departing_from_location,
+)
+from .interface.place_layer import create_place
 from .interface.trip_layer import (
     create_trip,
     delete_trip,
@@ -18,4 +25,3 @@ from .interface.trip_member_layer import (
     get_members_of_trip,
     get_trips_for_user,
 )
-from .interface.place_layer import create_place

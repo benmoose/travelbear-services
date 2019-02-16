@@ -15,6 +15,11 @@ def get_user_by_external_id(external_id):
 
 
 def get_or_create_user(external_id, email="", full_name="", short_name="", picture=""):
+    # short circuit need for transaction if only doing read
+    user = get_user_by_external_id(external_id)
+    if user is not None:
+        return user, False
+
     with transaction.atomic():
         return User.objects.get_or_create(
             external_id=external_id,

@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
 import pytest
+import pytz
 
 from db_layer.helpers import UpdateNotAllowed
+from db_layer.trip import create_place
 from db_layer.user import get_or_create_user
 
 from ..models import Location
@@ -12,8 +15,7 @@ from .location_layer import (
     delete_location,
     get_location_by_id,
     get_locations_for_trip,
-    get_moves_ending_at_location,
-    get_moves_starting_at_location,
+    get_places_for_location,
     update_location,
 )
 from .move_layer import create_move
@@ -82,20 +84,6 @@ def test_can_not_get_unowned_locations(trip):
 
 
 @pytest.mark.django_db
-def test_get_related_moves(trip):
-    location_1 = create_location(trip, "location 1", lat=0, lng=0)
-    location_2 = create_location(trip, "location 2", lat=0, lng=0)
-    move_1 = create_move(location_1, location_2)
-    move_2 = create_move(location_2, location_1)
-
-    assert get_moves_starting_at_location(location_1) == [move_1]
-    assert get_moves_starting_at_location(location_2) == [move_2]
-
-    assert get_moves_ending_at_location(location_1) == [move_2]
-    assert get_moves_ending_at_location(location_2) == [move_1]
-
-
-@pytest.mark.django_db
 def test_update_location(trip):
     original_location = create_location(
         trip, display_name="original name", lat=51, lng=1
@@ -130,3 +118,33 @@ def test_update_location_not_allowed_fields(trip):
     location = create_location(trip, display_name="location", lat=51, lng=1)
     with pytest.raises(UpdateNotAllowed):
         update_location(location, is_deleted=True)
+
+
+@pytest.mark.django_db
+def test_get_locations_for_trip(trip):
+    assert [] == get_locations_for_trip(trip)
+
+    location_1 = create_location(trip, "location-1", 51, 0)
+    location_2 = create_location(trip, "location-1", 51, 0)
+
+    assert {location_1, location_2} == set(get_locations_for_trip(trip))
+
+
+@pytest.mark.django_db
+def test_get_places_for_location(trip):
+    location = create_location(trip, "location", 51, 0)
+    assert [] == get_places_for_location(location)
+
+    earlier_time = datetime(2019, 1, 1, tzinfo=pytz.UTC)
+    later_time = earlier_time + timedelta(hours=1)
+
+    place_1 = create_place(location, "place 1", 51, 0, start_time=earlier_time)
+    place_2 = create_place(location, "place 2", 51, 0, start_time=later_time)
+    place_3 = create_place(location, "place 2", 51, 0, start_time=None)
+
+    assert [place_1, place_2, place_3] == get_places_for_location(location)
+
+    place_1.is_deleted = True
+    place_1.save()
+
+    assert [place_2] == get_places_for_location(location, with_times_only=True)
