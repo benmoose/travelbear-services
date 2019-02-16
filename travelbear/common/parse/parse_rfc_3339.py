@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 RFC_3339_FORMAT_STRING_WITH_MICROSECONDS = "%Y-%m-%dT%H:%M:%S.%f%z"
 RFC_3339_FORMAT_STRING = "%Y-%m-%dT%H:%M:%S%z"
 

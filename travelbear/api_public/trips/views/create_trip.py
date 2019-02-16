@@ -1,9 +1,10 @@
 from django.views.decorators.http import require_http_methods
 
 from api_public.auth import require_jwt_auth
-from common.response import validation_error_response, success_response
 from common.parse import safe_parse_json
+from common.response import success_response, validation_error_response
 from db_layer.trip import create_trip
+
 from ..models.trip import Trip
 
 

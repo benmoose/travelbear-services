@@ -1,12 +1,12 @@
-from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
-from cryptography.hazmat.backends import default_backend
-from django.test import RequestFactory
 import jwt
 import pytest
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
+from django.test import RequestFactory
 
 from db_layer.user import User, get_or_create_user
-from .auth_decorators import require_jwt_auth, AUDIENCE_NAME
 
+from .auth_decorators import AUDIENCE_NAME, require_jwt_auth
 
 test_private_key = generate_private_key(65537, 2048, default_backend())
 test_public_key = test_private_key.public_key()

@@ -4,7 +4,6 @@ from django.db import transaction
 
 from ..models.user import User
 
-
 logger = logging.getLogger(__name__)
 
 

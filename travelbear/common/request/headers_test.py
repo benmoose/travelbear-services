@@ -1,5 +1,4 @@
 import pytest
-
 from django.test import RequestFactory
 
 from .headers import get_authorization_header

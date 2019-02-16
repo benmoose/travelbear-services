@@ -1,12 +1,13 @@
 import json
-import pytest
 
-from django.urls import reverse
+import pytest
 from django.test import Client
+from django.urls import reverse
 
 from common.parse import safe_parse_json
 from db_layer.trip import Trip
 from db_layer.user import get_or_create_user
+
 from .handlers import root_endpoint
 
 

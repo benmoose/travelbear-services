@@ -1,13 +1,14 @@
 import json
 from uuid import uuid4
 
+import pytest
 from django.test import Client
 from django.urls import reverse
-import pytest
 
-from common.test import no_models_in_db, count_models_in_db
-from db_layer.trip import create_trip, Location
+from common.test import count_models_in_db, no_models_in_db
+from db_layer.trip import Location, create_trip
 from db_layer.user import get_or_create_user
+
 from .create_location import create_location_handler
 
 

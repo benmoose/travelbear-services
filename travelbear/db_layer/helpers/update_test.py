@@ -1,6 +1,7 @@
 import pytest
 
 from db_layer.user import User
+
 from .update import UpdateNotAllowed, is_update_allowed, update_object
 
 

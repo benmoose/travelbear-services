@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+
 import pytest
 import pytz
 
 from db_layer.trip import TripMember, create_trip
 from db_layer.user import get_or_create_user
+
 from .trip_member_layer import (
     UserIsAlreadyMember,
     add_member_to_trip,

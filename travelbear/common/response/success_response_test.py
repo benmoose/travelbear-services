@@ -1,10 +1,11 @@
 import json
-import pytest
 
+import pytest
 from django.http import HttpResponse
 
 from common.model import api_model
-from .success_response import success_response, ResponseError
+
+from .success_response import ResponseError, success_response
 
 
 @pytest.mark.parametrize(

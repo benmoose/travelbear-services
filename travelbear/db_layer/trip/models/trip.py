@@ -1,7 +1,7 @@
-from django.db import models
 from django.contrib.postgres.fields import JSONField
+from django.db import models
 
-from db_layer.helpers import ModelBase, ExternalIDField
+from db_layer.helpers import ExternalIDField, ModelBase
 from db_layer.user import User
 
 

@@ -2,17 +2,16 @@ import functools
 import logging
 from pathlib import Path
 
-from cryptography.x509 import load_pem_x509_certificate
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from cryptography.x509 import load_pem_x509_certificate
 from django.conf import settings
 from jwt import decode
 from jwt.exceptions import InvalidTokenError
 
-from common.response import error_response
 from common.request import get_authorization_header
+from common.response import error_response
 from db_layer.user import get_or_create_user
-
 
 logger = logging.getLogger(__name__)
 
