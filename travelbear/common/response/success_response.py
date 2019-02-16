@@ -4,7 +4,6 @@ from django.http import JsonResponse
 
 from .serialize import APIModelJSONSerializer
 
-
 logger = logging.getLogger(__name__)
 
 

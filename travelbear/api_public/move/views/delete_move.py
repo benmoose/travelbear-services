@@ -1,9 +1,8 @@
 from uuid import UUID
 
 from api_public.auth import require_jwt_auth
-from common.response import success_response, error_response, validation_error_response
-from common.parse import safe_parse_json
-from db_layer.trip import get_move_by_move_id, delete_move
+from common.response import error_response, success_response
+from db_layer.trip import delete_move, get_move_by_move_id
 
 
 @require_jwt_auth

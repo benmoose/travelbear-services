@@ -1,6 +1,6 @@
 import json
-import pytest
 
+import pytest
 from django.http import HttpResponse
 
 from .error_response import error_response, validation_error_response

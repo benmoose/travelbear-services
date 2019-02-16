@@ -17,14 +17,14 @@ jobs:
         command: |
           docker-compose build
     - run:
+        name: Check code style
+        command: |
+          docker-compose run --rm --no-deps server \
+            sh -c "black --check . && isort -rc -q --check-only travelbear"
+    - run:
         name: Run tests
         command: |
           docker-compose run --rm -e stack=test server \
             pytest
-    - run:
-        name: Run linter
-        command: |
-          docker-compose run --rm --no-deps server \
-            black --check .
     - store_test_results:
         path: test-results

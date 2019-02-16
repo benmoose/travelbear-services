@@ -1,7 +1,8 @@
 import pytest
 
+from db_layer.trip import add_member_to_trip, create_trip
 from db_layer.user import get_or_create_user
-from db_layer.trip import create_trip, add_member_to_trip
+
 from .user_trips import user_trips_qs
 
 

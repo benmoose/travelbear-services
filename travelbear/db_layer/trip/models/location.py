@@ -1,6 +1,7 @@
 from django.db import models
 
-from db_layer.helpers import ModelBase, ExternalIDField
+from db_layer.helpers import ExternalIDField, ModelBase
+
 from .trip import Trip
 
 

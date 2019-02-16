@@ -1,4 +1,5 @@
 from unittest.mock import Mock
+
 import pytest
 
 from .api_model import api_model

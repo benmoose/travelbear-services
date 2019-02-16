@@ -1,10 +1,10 @@
 from uuid import uuid4
 
+import pytest
 from django.test import Client
 from django.urls import reverse
-import pytest
 
-from db_layer.trip import add_member_to_trip, create_trip, create_location
+from db_layer.trip import add_member_to_trip, create_location, create_trip
 from db_layer.user import get_or_create_user
 
 from .handlers import trip_id_endpoint

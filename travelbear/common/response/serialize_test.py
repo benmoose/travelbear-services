@@ -1,6 +1,7 @@
 import json
 
 from common.model import api_model
+
 from .serialize import APIModelJSONSerializer
 
 

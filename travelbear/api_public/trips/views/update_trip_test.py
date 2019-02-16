@@ -1,11 +1,12 @@
 import json
 
-from django.urls import reverse
-from django.test import Client
 import pytest
+from django.test import Client
+from django.urls import reverse
 
-from db_layer.trip import create_trip, Trip
+from db_layer.trip import Trip, create_trip
 from db_layer.user import get_or_create_user
+
 from .handlers import trip_id_endpoint
 
 

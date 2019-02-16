@@ -1,6 +1,6 @@
+import pytest
 from django.test import Client
 from django.urls import reverse
-import pytest
 
 from .health import health_handler
 

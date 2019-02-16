@@ -18,7 +18,7 @@ build-prod:
 
 fmt:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \
-		run --rm --no-deps server black .
+		run --rm --no-deps server sh -c "black . && isort -rc -q travelbear"
 
 ssh:
 	docker-compose -f docker-compose.dev.yml -f docker-compose.yml \

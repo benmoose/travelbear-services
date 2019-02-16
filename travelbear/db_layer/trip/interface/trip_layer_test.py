@@ -1,22 +1,23 @@
 from datetime import datetime
-import pytest
-import pytz
 from uuid import uuid4
 
+import pytest
+import pytz
+
 from common.test import count_models_in_db, no_models_in_db
-from db_layer.user import get_or_create_user
 from db_layer.helpers import UpdateNotAllowed
 from db_layer.trip import (
     Trip,
     TripMember,
     add_member_to_trip,
-    create_trip,
     create_location,
+    create_trip,
     delete_trip,
-    get_trips_created_by_user,
     get_trip_by_id,
+    get_trips_created_by_user,
     update_trip,
 )
+from db_layer.user import get_or_create_user
 
 
 @pytest.mark.django_db

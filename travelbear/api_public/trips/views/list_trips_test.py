@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta
+
 import pytest
 import pytz
-
 from django.test import Client
 from django.urls import reverse
 
 from common.parse import safe_parse_json
 from common.test import count_models_in_db
-from db_layer.trip import create_trip, Trip, add_member_to_trip
+from db_layer.trip import Trip, add_member_to_trip, create_trip
 from db_layer.user import get_or_create_user
+
 from .handlers import root_endpoint
 
 

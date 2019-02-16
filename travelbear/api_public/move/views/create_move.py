@@ -1,7 +1,8 @@
 from api_public.auth import require_jwt_auth
-from common.response import success_response, error_response, validation_error_response
 from common.parse import safe_parse_json
+from common.response import error_response, success_response, validation_error_response
 from db_layer.trip import create_move, get_location_by_id
+
 from ..models import Move
 
 
