@@ -3,13 +3,13 @@ import attr
 
 def api_model(cls):
     """
-    API Model decorator for representing input from external sources.
+    API Model decorator for representing HTTP data from external sources.
     It is primarily responsible for
-     - encoding incoming data in a class (for use in application code)
+     - encoding data as fields in a class (for use in application code)
      - providing methods to check the validity of data.
 
-    To activate validity checking, classes using this decorator should add the `get_validation_errors`
-    method.
+    To activate validity checking, classes using this decorator should add the
+    `get_validation_errors` method.
     """
     cls._from_dict = classmethod(api_model_from_dict)
     if not hasattr(cls, "from_dict"):
