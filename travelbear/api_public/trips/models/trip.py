@@ -1,4 +1,4 @@
-from common.model import api_model, validation
+from common.api import api_model, validation
 
 from .location import Location
 

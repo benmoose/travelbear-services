@@ -3,7 +3,7 @@ import json
 import pytest
 from django.http import HttpResponse
 
-from common.model import api_model
+from common.api import api_model
 
 from .success_response import ResponseError, success_response
 

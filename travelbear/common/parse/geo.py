@@ -1,6 +1,8 @@
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Optional, Tuple, Union
 
+from common.geo import is_valid_latitude, is_valid_longitude
+
 
 class InvalidLatLng(ValueError):
     pass
@@ -42,52 +44,24 @@ def parse_lat_lng_string(s: str) -> Tuple[float, float]:
     return lat, lng
 
 
-def is_valid_latitude(lat: Union[int, float]) -> bool:
+def to_six_dp(n: Union[str, int, float]) -> float:
     """
-    >>> is_valid_latitude(-90)
-    True
-    >>> is_valid_latitude(90)
-    True
-    >>> is_valid_latitude(0)
-    True
-    >>> is_valid_latitude(-90.1)
-    False
-    >>> is_valid_latitude(90.1)
-    False
-    """
-    return -90 <= lat <= 90
-
-
-def is_valid_longitude(lng: Union[int, float]) -> bool:
-    """
-    >>> is_valid_longitude(-180)
-    True
-    >>> is_valid_longitude(180)
-    True
-    >>> is_valid_longitude(0)
-    True
-    >>> is_valid_longitude(-180.1)
-    False
-    >>> is_valid_longitude(180.1)
-    False
-    """
-    return -180 <= lng <= 180
-
-
-def to_six_dp(n: str) -> float:
-    """
-    >>> to_six_dp("0.0000005")
+    >>> to_six_dp("0.000_000_5")
     1e-06
-    >>> to_six_dp("51.1")
-    51.1
+    >>> to_six_dp("-1051.100000000")
+    -1051.1
     >>> to_six_dp("51.123456")
     51.123456
-    >>> to_six_dp("51.123456789")
+    >>> to_six_dp(51.123_456_789)
     51.123457
     >>> to_six_dp("51")
     51.0
+    >>> to_six_dp(-1)
+    -1.0
     >>> to_six_dp("0")
     0.0
+    >>> to_six_dp(0.000_0005)
+    1e-06
     """
     # use decimal logic to avoid Python rounding weirdness
     return float(Decimal(str(n)).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP))

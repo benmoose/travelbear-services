@@ -5,7 +5,7 @@ def api_model(cls):
     """
     API Model decorator for representing input from external sources.
     It is primarily responsible for
-     - encoding incoming data in a class (for easy use in application code)
+     - encoding incoming data in a class (for use in application code)
      - providing methods to check the validity of data.
 
     To activate validity checking, classes using this decorator should add the `get_validation_errors`
