@@ -1,6 +1,6 @@
 import pytest
 
-from .parse_json import safe_parse_json
+from .json import safe_parse_json
 
 
 @pytest.mark.parametrize(
