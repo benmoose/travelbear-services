@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from .api_model import api_model
+from .api_model import API_MODEL_FLAG, api_model
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def model():
 
 
 def test_api_model_has_expected_fields(model):
-    assert "__api_model__" in model.__dict__
+    assert API_MODEL_FLAG in model.__dict__
     assert "_from_dict" in model.__dict__
     assert "from_dict" in model.__dict__
     assert "_from_db_model" in model.__dict__
@@ -51,9 +51,7 @@ def test_api_model_to_dict(model):
     assert model(1, 2).to_dict() == {"foo": 1, "bar": 2}
     assert model(1).to_dict() == {"foo": 1}
     assert model(bar=2).to_dict() == {"bar": 2}
-
-    assert model(1).to_dict(keep_empty_fields=True) == {"foo": 1, "bar": None}
-    assert model(bar=2).to_dict(keep_empty_fields=True) == {"foo": None, "bar": 2}
+    assert model(foo=model(1, 2)).to_dict() == {"foo": {"foo": 1, "bar": 2}}
 
 
 def test_api_model_from_dict(model):

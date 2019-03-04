@@ -6,7 +6,8 @@ from django.test import Client
 from django.urls import reverse
 
 from common.test import count_models_in_db, no_models_in_db
-from db_layer.trip import Location, create_trip
+from db_layer.trip import create_trip
+from db_layer.trip.models import Location
 from db_layer.user import get_or_create_user
 
 from .create_location import create_location_handler

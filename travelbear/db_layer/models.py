@@ -1,2 +1,2 @@
-from .trip import Trip
-from .user import User
+from .trip.models.trip import Trip
+from .user.models.user import User

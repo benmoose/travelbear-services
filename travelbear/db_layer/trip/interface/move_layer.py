@@ -1,6 +1,6 @@
 from django.db import transaction
 
-from db_layer.trip import Move, get_location_by_id
+from ..models import Move
 
 
 def create_move(

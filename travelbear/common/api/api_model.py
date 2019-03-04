@@ -1,5 +1,9 @@
 import attr
 
+from .validation import get_required_field_error_message, get_type_mismatch_error_message
+
+API_MODEL_FLAG = "__api_model__"
+
 
 def api_model(cls):
     """
@@ -32,7 +36,7 @@ def api_model(cls):
 
     cls.__attrs_post_init__ = api_model_post_init
 
-    cls.__api_model__ = True
+    setattr(cls, API_MODEL_FLAG, True)
 
     return attr.s(
         cls,
@@ -54,10 +58,19 @@ def api_model_get_ib_fields(fields):
     return mapping
 
 
-def api_model_to_dict(self, keep_empty_fields=False):
-    return attr.asdict(
-        self, filter=lambda k, v: _filter_attributes(k, v, keep_empty_fields)
-    )
+def api_model_to_dict(self):
+    dct = {}
+    for attribute in attr.fields(self.__class__):
+        if not attribute.repr:
+            continue
+        value = getattr(self, attribute.name, None)
+        if value is None:
+            continue
+        if hasattr(value, API_MODEL_FLAG):
+            dct[attribute.name] = value.to_dict()
+        else:
+            dct[attribute.name] = value
+    return dct
 
 
 def api_model_from_dict(cls, data):
@@ -80,9 +93,3 @@ def api_model_from_db_model(cls, db_model):
 
 def api_model_is_valid(self):
     return not bool(self.validation_errors)
-
-
-def _filter_attributes(attribute, value, keep_empty_keys):
-    pass_key = attribute.repr
-    pass_value = keep_empty_keys or value is not None
-    return pass_key and pass_value

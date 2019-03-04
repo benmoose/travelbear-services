@@ -17,8 +17,3 @@ from .interface.trip_member_layer import (
     get_members_of_trip,
     get_trips_for_user,
 )
-from .models.location import Location
-from .models.move import Move
-from .models.place import Place
-from .models.trip import Trip
-from .models.trip_member import TripMember

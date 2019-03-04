@@ -4,7 +4,8 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
-from db_layer.trip import Move, create_location, create_trip
+from db_layer.trip import create_location, create_trip
+from db_layer.trip.models import Move
 from db_layer.user import get_or_create_user
 
 from .create_move import create_move_handler

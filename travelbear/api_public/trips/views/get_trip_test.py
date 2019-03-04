@@ -45,6 +45,9 @@ def test_return_trip_with_locations(user, trip):
 
     response = call_endpoint(user, trip.trip_id)
     assert response.status_code == 200
+    import json
+
+    print(json.dumps(response.json(), indent=2))
     assert {
         "trip_id": str(trip.trip_id),
         "title": "some trip",
@@ -53,8 +56,7 @@ def test_return_trip_with_locations(user, trip):
             {
                 "location_id": str(location.location_id),
                 "display_name": "London",
-                "lat": "51.105667",
-                "lng": "-0.120000",
+                "coords": [51.105667, -0.120000],
                 "google_place_id": "",
             }
         ],

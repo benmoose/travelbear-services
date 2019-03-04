@@ -3,7 +3,8 @@ from datetime import datetime
 from django.db import transaction
 
 from db_layer.helpers import update_object
-from db_layer.trip import Location, Place
+
+from ..models import Location, Place
 
 
 def create_place(

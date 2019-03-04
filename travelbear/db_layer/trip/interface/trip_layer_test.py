@@ -7,8 +7,6 @@ import pytz
 from common.test import count_models_in_db, no_models_in_db
 from db_layer.helpers import UpdateNotAllowed
 from db_layer.trip import (
-    Trip,
-    TripMember,
     add_member_to_trip,
     create_location,
     create_trip,
@@ -18,6 +16,8 @@ from db_layer.trip import (
     update_trip,
 )
 from db_layer.user import get_or_create_user
+
+from ..models import Trip, TripMember
 
 
 @pytest.mark.django_db
