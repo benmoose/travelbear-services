@@ -1,6 +1,9 @@
 import attr
 
-from .validation import get_required_field_error_message, get_type_mismatch_error_message
+from .validation import (
+    get_required_field_error_message,
+    get_type_mismatch_error_message,
+)
 
 API_MODEL_FLAG = "__api_model__"
 

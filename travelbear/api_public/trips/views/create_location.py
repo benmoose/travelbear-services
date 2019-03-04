@@ -32,8 +32,8 @@ def persist_location(trip, event):
     location = create_location(
         trip=trip,
         display_name=event.display_name,
-        lat=event.lat,
-        lng=event.lng,
+        lat=event.coords.lat,
+        lng=event.coords.lng,
         google_place_id=event.google_place_id,
     )
     return Location.from_db_model(location)

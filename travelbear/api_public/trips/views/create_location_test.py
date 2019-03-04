@@ -68,8 +68,7 @@ def test_create_location(user, trip):
     assert {
         "location_id": response.json().get("location_id"),
         "display_name": "location name",
-        "lat": 51.5,
-        "lng": -0.12,
+        "coords": [51.5, -0.12],
         "google_place_id": "foobar",
     } == response.json()
 

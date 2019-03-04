@@ -1,6 +1,6 @@
 from api_public.trips.models import Location
 from common.api import api_model
-from common.api.validation import required_fields, get_type_mismatch_error_message
+from common.api.validation import get_type_mismatch_error_message, required_fields
 
 
 @api_model
@@ -20,11 +20,9 @@ class Move:
         )
 
     def get_validation_errors(self):
-        errors = required_fields(
-            self, ["start_location_id", "end_location_id"]
-        )
+        errors = required_fields(self, ["start_location_id", "end_location_id"])
         if not isinstance(self.start_location_id, str):
-            errors.append(get_type_mismatch_error_message("start_location_id", str))
+            errors.append(get_type_mismatch_error_message("start_location_id", [str]))
         if not isinstance(self.end_location_id, str):
-            errors.append(get_type_mismatch_error_message("end_location_id", str))
+            errors.append(get_type_mismatch_error_message("end_location_id", [str]))
         return errors

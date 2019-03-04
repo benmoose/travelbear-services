@@ -47,7 +47,6 @@ def test_return_trip_with_locations(user, trip):
     assert response.status_code == 200
     import json
 
-    print(json.dumps(response.json(), indent=2))
     assert {
         "trip_id": str(trip.trip_id),
         "title": "some trip",

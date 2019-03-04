@@ -1,5 +1,5 @@
 from common.api import api_model
-from common.api.validation import required_fields, get_required_field_error_message
+from common.api.validation import get_required_field_error_message, required_fields
 from common.models import Coords
 
 
@@ -33,10 +33,16 @@ class Location:
     def get_validation_errors(self):
         errors = required_fields(self, ("display_name", "coords"))
         if self.coords is None:
-            errors.extend([
-                get_required_field_error_message(field_name="lat"),
-                get_required_field_error_message(field_name="lng"),
-            ])
+            errors.extend(
+                [
+                    get_required_field_error_message(field_name="lat"),
+                    get_required_field_error_message(field_name="lng"),
+                ]
+            )
+        elif self.coords.lat is None:
+            errors.append(get_required_field_error_message("lat"))
+        elif self.coords.lng is None:
+            errors.append(get_required_field_error_message("lng"))
         return errors
 
 
@@ -49,7 +55,7 @@ def test_from_dict():
     }
     expected_model = Location(
         display_name="some name",
-        location=Coords(lat=51.176044, lng=-0.102215),
+        coords=Coords(lat=51.176044, lng=-0.102215),
         google_place_id="goog123",
     )
     assert expected_model == Location.from_dict(data)
@@ -57,12 +63,10 @@ def test_from_dict():
 
 def test_to_dict():
     location = Location(
-        display_name="some name",
-        coords=Coords(lat=51.2, lng=-0.12),
-        google_place_id="goog123",
+        display_name="some name", coords=Coords(51.2, -0.12), google_place_id="goog123"
     )
     assert {
         "display_name": "some name",
-        "coords": (51.1, -0.12),
+        "coords": (51.2, -0.12),
         "google_place_id": "goog123",
     } == location.to_dict()
