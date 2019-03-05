@@ -1,10 +1,5 @@
 import attr
 
-from .validation import (
-    get_required_field_error_message,
-    get_type_mismatch_error_message,
-)
-
 API_MODEL_FLAG = "__api_model__"
 
 
@@ -26,9 +21,9 @@ def api_model(cls):
     if not hasattr(cls, "from_db_model"):
         cls.from_db_model = classmethod(api_model_from_db_model)
 
-    cls._to_dict = api_model_to_dict
-    if not hasattr(cls, "to_dict"):
-        cls.to_dict = api_model_to_dict
+    cls._serialise = api_model_serialise
+    if not hasattr(cls, "serialise"):
+        cls.serialise = api_model_serialise
 
     if not hasattr(cls, "get_validation_errors"):
         cls.get_validation_errors = lambda _: []
@@ -42,11 +37,8 @@ def api_model(cls):
     setattr(cls, API_MODEL_FLAG, True)
 
     return attr.s(
-        cls,
-        these=api_model_get_ib_fields(cls.__slots__),
-        slots=True,
-        weakref_slot=False,
-    )
+        these=api_model_get_attributes(cls.__slots__), slots=True, weakref_slot=False
+    )(cls)
 
 
 def api_model_post_init(self):
@@ -55,22 +47,22 @@ def api_model_post_init(self):
         self.__post_init__()
 
 
-def api_model_get_ib_fields(fields):
-    mapping = {field: attr.ib(default=None) for field in fields}
+def api_model_get_attributes(slots):
+    mapping = {slot: attr.ib(default=None) for slot in slots}
     mapping["validation_errors"] = attr.ib(factory=list, repr=False)
     return mapping
 
 
-def api_model_to_dict(self):
+def api_model_serialise(self) -> dict:
     dct = {}
     for attribute in attr.fields(self.__class__):
         if not attribute.repr:
             continue
         value = getattr(self, attribute.name, None)
-        if value is None:
+        if value is None or value == "":
             continue
         if hasattr(value, API_MODEL_FLAG):
-            dct[attribute.name] = value.to_dict()
+            dct[attribute.name] = value.serialise()
         else:
             dct[attribute.name] = value
     return dct
@@ -94,5 +86,9 @@ def api_model_from_db_model(cls, db_model):
     return cls(**args)
 
 
-def api_model_is_valid(self):
+def api_model_is_valid(self) -> bool:
     return not bool(self.validation_errors)
+
+
+def is_api_model(cls) -> bool:
+    return hasattr(cls, API_MODEL_FLAG)

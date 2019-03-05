@@ -24,12 +24,6 @@ class Location:
             google_place_id=db_model.google_place_id,
         )
 
-    def to_dict(self):
-        dct = self._to_dict()
-        if self.coords is not None:
-            dct["coords"] = self.coords.to_tuple()
-        return dct
-
     def get_validation_errors(self):
         errors = required_fields(self, ("display_name", "coords"))
         if self.coords is None:
@@ -44,29 +38,3 @@ class Location:
         elif self.coords.lng is None:
             errors.append(get_required_field_error_message("lng"))
         return errors
-
-
-def test_from_dict():
-    data = {
-        "display_name": "some name",
-        "lat": 51.176044,
-        "lng": -0.102215,
-        "google_place_id": "goog123",
-    }
-    expected_model = Location(
-        display_name="some name",
-        coords=Coords(lat=51.176044, lng=-0.102215),
-        google_place_id="goog123",
-    )
-    assert expected_model == Location.from_dict(data)
-
-
-def test_to_dict():
-    location = Location(
-        display_name="some name", coords=Coords(51.2, -0.12), google_place_id="goog123"
-    )
-    assert {
-        "display_name": "some name",
-        "coords": (51.2, -0.12),
-        "google_place_id": "goog123",
-    } == location.to_dict()

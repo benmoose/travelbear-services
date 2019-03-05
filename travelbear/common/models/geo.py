@@ -18,6 +18,9 @@ class Coords:
     def to_tuple(self):
         return self.lat, self.lng
 
+    def serialise(self):
+        return self.to_tuple()
+
 
 def test_initialisation():
     assert Coords("90.1", "180.0") == Coords(90.1, 180)
