@@ -1,7 +1,7 @@
 from django.db import models
 
 from db_layer.helpers import ModelBase
-from db_layer.user import User
+from db_layer.user.models import User
 
 from .trip import Trip
 

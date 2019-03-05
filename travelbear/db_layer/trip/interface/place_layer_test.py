@@ -1,9 +1,10 @@
 import pytest
 
 from common.test import count_models_in_db, no_models_in_db
-from db_layer.trip import Place, create_location, create_trip
+from db_layer.trip import create_location, create_trip
 from db_layer.user import get_or_create_user
 
+from ..models import Place
 from .place_layer import create_place, delete_place, update_place
 
 

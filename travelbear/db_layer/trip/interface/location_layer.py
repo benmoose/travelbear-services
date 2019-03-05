@@ -1,7 +1,8 @@
 from django.db import transaction
 
 from db_layer.helpers import update_object
-from db_layer.trip import Location
+
+from ..models import Location
 
 
 def get_user_locations_qs(user):

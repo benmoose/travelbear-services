@@ -4,9 +4,9 @@ from uuid import uuid4
 import pytest
 
 from db_layer.helpers import UpdateNotAllowed
-from db_layer.trip import Location
 from db_layer.user import get_or_create_user
 
+from ..models import Location
 from .location_layer import (
     create_location,
     delete_location,

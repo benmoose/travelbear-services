@@ -1,8 +1,8 @@
 import pytest
 
-from db_layer.trip import Move
 from db_layer.user import get_or_create_user
 
+from ..models import Move
 from .location_layer import create_location
 from .move_layer import create_move, delete_move, get_move_by_move_id
 from .trip_layer import create_trip

@@ -1,6 +1,6 @@
 import pytest
 
-from db_layer.user import User
+from db_layer.user.models import User
 
 from .db import count_models_in_db, no_models_in_db
 

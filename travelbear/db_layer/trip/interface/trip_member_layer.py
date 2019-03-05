@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 
 from ..helpers.user_trips import user_trips_qs
-from ..models.trip_member import TripMember
+from ..models import TripMember
 
 
 class UserIsAlreadyMember(IntegrityError):

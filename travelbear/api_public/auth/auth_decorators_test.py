@@ -4,7 +4,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from django.test import RequestFactory
 
-from db_layer.user import User, get_or_create_user
+from db_layer.user import get_or_create_user
+from db_layer.user.models import User
 
 from .auth_decorators import AUDIENCE_NAME, require_jwt_auth
 

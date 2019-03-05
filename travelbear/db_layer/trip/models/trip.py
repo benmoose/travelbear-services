@@ -2,7 +2,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from db_layer.helpers import ExternalIDField, ModelBase
-from db_layer.user import User
+from db_layer.user.models import User
 
 
 class Trip(ModelBase):

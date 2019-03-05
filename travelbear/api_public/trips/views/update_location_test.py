@@ -66,8 +66,7 @@ def test_update_location(call_endpoint, user, trip):
         "location_id": str(location.location_id),
         "display_name": "Ilkley",
         "google_place_id": "google-id-1",
-        "lat": 53,
-        "lng": -1.8,
+        "coords": [53.0, -1.8],
     }
 
 
