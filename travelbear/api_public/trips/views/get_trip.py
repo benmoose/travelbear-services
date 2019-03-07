@@ -2,7 +2,7 @@ from django.views.decorators.http import require_http_methods
 
 from api_public.auth import require_jwt_auth
 from common.response import error_response, success_response
-from db_layer.trip import get_trip_by_id, get_locations_for_trip
+from db_layer.trip import get_locations_for_trip, get_trip_by_id
 
 from ..models.trip import Trip
 

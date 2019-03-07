@@ -47,10 +47,12 @@ def test_delete_place(location):
 @pytest.mark.django_db
 def test_update_place(location):
     place = create_place(location, display_name="test place", lat=51, lng=0)
-    update_place(place, display_name="cool new name", lat=100, is_booked=True)
+    update_place(
+        place, display_name="cool new name", lat=100, display_address="Old Street"
+    )
 
     place.refresh_from_db()
     assert place.display_name == "cool new name"
     assert place.lat == 100
     assert place.lng == 0
-    assert place.is_booked == True
+    assert place.display_address == "Old Street"

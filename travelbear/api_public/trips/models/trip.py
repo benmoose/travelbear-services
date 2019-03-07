@@ -11,10 +11,7 @@ class Trip:
     @classmethod
     def from_db_model_and_locations(cls, db_model, locations):
         trip = cls.from_db_model(db_model)
-        trip.locations = [
-            Location.from_db_model(location)
-            for location in locations
-        ]
+        trip.locations = [Location.from_db_model(location) for location in locations]
         return trip
 
     def get_validation_errors(self):
