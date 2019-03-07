@@ -2,6 +2,7 @@ from .interface.location_layer import (
     create_location,
     delete_location,
     get_location_by_id,
+    get_locations_for_trip,
     update_location,
 )
 from .interface.move_layer import create_move, delete_move, get_move_by_move_id

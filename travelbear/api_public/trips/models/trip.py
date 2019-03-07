@@ -8,14 +8,14 @@ from .location import Location
 class Trip:
     __slots__ = ("trip_id", "title", "description", "tags", "locations")
 
-    def __post_init__(self):
-        if not self.description:
-            self.description = ""
-
-        if self.locations:
-            self.locations = [
-                Location.from_db_model(location) for location in self.locations
-            ]
+    @classmethod
+    def from_db_model_and_locations(cls, db_model, locations):
+        trip = cls.from_db_model(db_model)
+        trip.locations = [
+            Location.from_db_model(location)
+            for location in locations
+        ]
+        return trip
 
     def get_validation_errors(self):
         errors = required_fields(self, ("title",))

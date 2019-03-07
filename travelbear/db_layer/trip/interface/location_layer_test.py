@@ -11,6 +11,7 @@ from .location_layer import (
     create_location,
     delete_location,
     get_location_by_id,
+    get_locations_for_trip,
     get_moves_ending_at_location,
     get_moves_starting_at_location,
     update_location,
@@ -112,6 +113,16 @@ def test_update_location(trip):
     assert update_1.google_place_id == "new field"
     assert update_1.lat == 52
     assert update_1.lng == 2
+
+
+@pytest.mark.django_db
+def test_get_locations_for_trip(trip):
+    assert [] == get_locations_for_trip(trip)
+
+    location_1 = create_location(trip, "location-1", 51, 0)
+    location_2 = create_location(trip, "location-1", 51, 0)
+
+    assert {location_1, location_2} == set(get_locations_for_trip(trip))
 
 
 @pytest.mark.django_db

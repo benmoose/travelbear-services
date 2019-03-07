@@ -4,7 +4,7 @@ from api_public.auth import require_jwt_auth
 from common.parse import safe_parse_json
 from common.response import error_response, success_response, validation_error_response
 from db_layer.helpers import UpdateNotAllowed
-from db_layer.trip import get_trip_by_id, update_location
+from db_layer.trip import get_trip_by_id, update_location, get_locations_for_trip
 
 from ..models import Location
 
@@ -29,7 +29,7 @@ def update_location_handler(request, trip_id, location_id):
 
 
 def get_location_by_id_from_trip(trip, location_id):
-    for location in trip.locations:
+    for location in get_locations_for_trip(trip):
         if str(location.location_id) == location_id:
             return location
     return None
