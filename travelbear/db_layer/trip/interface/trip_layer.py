@@ -43,12 +43,8 @@ def get_trips_created_by_user(user, include_deleted=False, ascending=False):
 
 
 def get_trip_by_id(user, trip_id):
-    user_trips = user_trips_qs(user)
     try:
-        locations_qs = Location.objects.filter(is_deleted=False)
-        return user_trips.prefetch_related(
-            Prefetch("location_set", queryset=locations_qs, to_attr="locations")
-        ).get(trip_id=trip_id)
+        return user_trips_qs(user).get(trip_id=trip_id)
     except Trip.DoesNotExist:
         return None
 
