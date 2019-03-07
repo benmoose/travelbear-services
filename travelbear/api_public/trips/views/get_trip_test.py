@@ -34,7 +34,6 @@ def test_return_trip_without_locations(user, trip):
     assert {
         "trip_id": str(trip.trip_id),
         "title": "some trip",
-        "description": "",
         "locations": [],
     } == response.json()
 
@@ -45,18 +44,14 @@ def test_return_trip_with_locations(user, trip):
 
     response = call_endpoint(user, trip.trip_id)
     assert response.status_code == 200
-    import json
-
     assert {
         "trip_id": str(trip.trip_id),
         "title": "some trip",
-        "description": "",
         "locations": [
             {
                 "location_id": str(location.location_id),
                 "display_name": "London",
                 "coords": [51.105667, -0.120000],
-                "google_place_id": "",
             }
         ],
     } == response.json()
@@ -73,7 +68,6 @@ def test_can_get_details_if_trip_member(trip):
     assert {
         "trip_id": str(trip.trip_id),
         "title": "some trip",
-        "description": "",
         "locations": [],
     } == response.json()
 
