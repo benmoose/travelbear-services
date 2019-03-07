@@ -36,6 +36,10 @@ def get_location_by_id(user, location_id):
         return None
 
 
+def get_locations_for_trip(trip):
+    return list(Location.objects.filter(trip=trip))
+
+
 def get_moves_starting_at_location(location):
     return list(location.start_location_for.all())
 
