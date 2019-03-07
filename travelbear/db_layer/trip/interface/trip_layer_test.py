@@ -94,16 +94,14 @@ def test_get_trips_for_user():
 def test_get_trip_by_id(django_assert_num_queries):
     trip_owner, _ = get_or_create_user("trip-owner")
     trip = create_trip(trip_owner, "test trip")
-    location = create_location(trip, "location", lat=4, lng=2)
 
     trip_member, _ = get_or_create_user("trip-member")
     add_member_to_trip(trip_member, trip)
 
     for user in [trip_owner, trip_member]:
-        with django_assert_num_queries(2):
+        with django_assert_num_queries(1):
             retrieved_trip = get_trip_by_id(user, trip.trip_id)
             assert retrieved_trip.pk == trip.pk
-            assert retrieved_trip.locations == [location]
 
     assert get_trip_by_id(trip_owner, str(uuid4())) is None
 
