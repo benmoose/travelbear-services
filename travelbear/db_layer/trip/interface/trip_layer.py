@@ -1,10 +1,10 @@
 from django.db import transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 
 from db_layer.helpers import update_object
 
 from ..helpers.user_trips import user_trips_qs
-from ..models import Location, Trip
+from ..models import Trip
 from .trip_member_layer import add_member_to_trip
 
 

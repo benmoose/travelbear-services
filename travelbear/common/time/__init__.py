@@ -1,1 +1,2 @@
-from .current_utc_time import get_current_utc_time
+from .generate import get_current_utc_time
+from .manipulation import get_day_from_datetime

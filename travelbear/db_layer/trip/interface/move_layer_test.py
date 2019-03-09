@@ -1,10 +1,18 @@
+from datetime import datetime
+
 import pytest
 
+from db_layer.helpers import InvalidArguments
 from db_layer.user import get_or_create_user
 
 from ..models import Move
 from .location_layer import create_location
-from .move_layer import create_move, delete_move, get_move_by_move_id
+from .move_layer import (
+    create_move,
+    delete_move,
+    get_move_by_move_id,
+    get_moves_departing_from_location,
+)
 from .trip_layer import create_trip
 
 
@@ -43,6 +51,16 @@ def test_create_move(location_1, location_2):
 
 
 @pytest.mark.django_db
+def test_create_move_depart_after_arrive(location_1, location_2):
+    earlier_time = datetime(2019, 1, 1)
+    later_time = datetime(2020, 2, 1)
+    with pytest.raises(InvalidArguments):
+        create_move(
+            location_1, location_2, arrive_time=earlier_time, depart_time=later_time
+        )
+
+
+@pytest.mark.django_db
 def test_reverse_lookup(location_1, location_2):
     move = create_move(location_1, location_2)
     create_move(location_2, location_1)
@@ -72,3 +90,10 @@ def test_get_move_by_move_id(user, location_1, location_2):
 
     someone_else, _ = get_or_create_user("someone-else")
     assert get_move_by_move_id(someone_else, db_move.move_id) is None
+
+
+@pytest.mark.django_db
+def test_get_moves_starting_at_location(location_1, location_2):
+    db_move = create_move(location_1, location_2)
+    assert get_moves_departing_from_location(location_1) == [db_move]
+    assert get_moves_departing_from_location(location_2) == []
