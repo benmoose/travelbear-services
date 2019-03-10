@@ -8,10 +8,6 @@ from db_layer.helpers import update_object
 from ..models import Location, Place
 
 
-def get_user_locations_qs(user):
-    return Location.objects.filter(trip__created_by=user, is_deleted=False)
-
-
 def create_location(trip, display_name, lat, lng, google_place_id=""):
     return Location.objects.create(
         trip=trip,
