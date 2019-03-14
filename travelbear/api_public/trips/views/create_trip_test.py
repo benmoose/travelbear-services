@@ -66,6 +66,7 @@ def test_create_trip(call_create_trip_endpoint, data):
     response_json = safe_parse_json(response.content)
     expected_response_data = {
         "trip_id": response_json.get("trip_id"),
+        "created_on": response_json.get("created_on"),
         "title": data["title"],
     }
     if data.get("description", "") != "":

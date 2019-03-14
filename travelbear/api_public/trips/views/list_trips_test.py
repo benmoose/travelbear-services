@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 
 import pytest
-import pytz
 from django.test import Client
 from django.urls import reverse
 
+from common.parse import safe_parse_rfc3339
 from common.test import count_models_in_db
 from db_layer.trip import add_member_to_trip, create_trip
 from db_layer.trip.models import Trip
@@ -15,7 +15,7 @@ from .handlers import root_endpoint
 
 @pytest.fixture
 def time():
-    return datetime(2019, 1, 1, tzinfo=pytz.UTC)
+    return safe_parse_rfc3339("2019-01-01T10:00:00Z")
 
 
 @pytest.fixture
@@ -49,7 +49,12 @@ def test_list_trips(user_1, user_1_trip, user_2_trip):
     response = call_list_endpoint(as_user=user_1)
     assert response.status_code == 200
     assert [
-        {"title": "event 1", "description": "rick", "trip_id": str(user_1_trip.trip_id)}
+        {
+            "title": "event 1",
+            "description": "rick",
+            "trip_id": str(user_1_trip.trip_id),
+            "created_on": "2019-01-01T09:00:00Z",
+        }
     ] == response.json()
 
     # trips user is member of should be returned
@@ -62,11 +67,13 @@ def test_list_trips(user_1, user_1_trip, user_2_trip):
             "title": "event 1",
             "description": "rick",
             "trip_id": str(user_1_trip.trip_id),
+            "created_on": "2019-01-01T09:00:00Z",
         },
         {
             "title": "event 2",
             "description": "summer",
             "trip_id": str(user_2_trip.trip_id),
+            "created_on": "2019-01-01T08:00:00Z",
         },
     ] == response.json()
 

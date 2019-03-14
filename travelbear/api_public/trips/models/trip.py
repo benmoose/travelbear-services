@@ -6,7 +6,7 @@ from .location import Location
 
 @api_model
 class Trip:
-    __slots__ = ("trip_id", "title", "description", "tags", "locations")
+    __slots__ = ("trip_id", "title", "description", "tags", "locations", "created_on")
 
     @classmethod
     def from_dict(cls, data):

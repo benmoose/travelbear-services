@@ -4,10 +4,16 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
+from common.parse import safe_parse_rfc3339
 from db_layer.trip import add_member_to_trip, create_location, create_trip
 from db_layer.user import get_or_create_user
 
 from .handlers import trip_id_endpoint
+
+
+@pytest.fixture
+def time():
+    return safe_parse_rfc3339("2019-01-01T10:00:00Z")
 
 
 @pytest.fixture
@@ -17,8 +23,11 @@ def user():
 
 
 @pytest.fixture
-def trip(user):
-    return create_trip(user, "some trip")
+def trip(time, user):
+    trip = create_trip(user, "some trip")
+    trip.created_on = time
+    trip.save()
+    return trip
 
 
 @pytest.mark.django_db
@@ -34,6 +43,7 @@ def test_return_trip_without_locations(user, trip):
     assert {
         "trip_id": str(trip.trip_id),
         "title": "some trip",
+        "created_on": "2019-01-01T10:00:00Z",
         "locations": [],
     } == response.json()
 
@@ -47,6 +57,7 @@ def test_return_trip_with_locations(user, trip):
     assert {
         "trip_id": str(trip.trip_id),
         "title": "some trip",
+        "created_on": "2019-01-01T10:00:00Z",
         "locations": [
             {
                 "location_id": str(location.location_id),
@@ -69,6 +80,7 @@ def test_can_get_details_if_trip_member(trip):
         "trip_id": str(trip.trip_id),
         "title": "some trip",
         "locations": [],
+        "created_on": "2019-01-01T10:00:00Z",
     } == response.json()
 
 
