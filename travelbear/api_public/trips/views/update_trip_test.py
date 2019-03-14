@@ -4,11 +4,17 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
+from common.parse import safe_parse_rfc3339
 from db_layer.trip import create_trip
 from db_layer.trip.models import Trip
 from db_layer.user import get_or_create_user
 
 from .handlers import trip_id_endpoint
+
+
+@pytest.fixture
+def time():
+    return safe_parse_rfc3339("2019-01-01T00:00:00Z")
 
 
 @pytest.fixture
@@ -34,10 +40,13 @@ def user():
 
 
 @pytest.fixture
-def trip(user):
-    return create_trip(
+def trip(time, user):
+    trip = create_trip(
         user, title="some title", description="some desc", tags=["roadtrip"]
     )
+    trip.created_on = time
+    trip.save()
+    return trip
 
 
 @pytest.mark.django_db
@@ -53,22 +62,21 @@ def test_update_trip(call_endpoint, trip):
         data={"title": "new title", "tags": ["camping", "mountains"]},
     )
     assert 200 == response.status_code
-    response_body = json.loads(response.content)
-    assert response_body == {
+    assert {
         "trip_id": str(trip.trip_id),
         "title": "new title",
         "description": "some desc",
         "tags": ["camping", "mountains"],
-    }
+        "created_on": "2019-01-01T00:00:00Z",
+    } == response.json()
 
     response = call_endpoint(
         trip.created_by, trip.trip_id, data={"is_deleted": True, "title": "foo"}
     )
     assert 400 == response.status_code
-    response_body = json.loads(response.content)
     assert Trip.objects.get(pk=trip.pk).is_deleted is False
     assert Trip.objects.get(pk=trip.pk).title != "foo"
-    assert response_body["validation_errors"] == [
+    assert response.json()["validation_errors"] == [
         "Cannot update one or more requested fields"
     ]
 

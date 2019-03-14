@@ -37,7 +37,6 @@ def require_jwt_auth(_func=None, *, public_key=None):
                     return func(request, *args, **kwargs)
 
             auth_header = get_authorization_header(request.META)
-            logger.info("request has auth header '%s'", auth_header)
             if auth_header is None:
                 return error_response(
                     status=401, message="Missing authorization header"
