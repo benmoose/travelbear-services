@@ -30,20 +30,21 @@ def require_jwt_auth(_func=None, *, public_key=None):
     def decorator_require_jwt_auth(func):
         @functools.wraps(func)
         def wrapper(request, *args, **kwargs):
-
             if settings.IS_TEST_ENVIRONMENT:
                 user = get_user_from_test_user_header(request.META)
                 if user is not None:
                     request.user = user
                     return func(request, *args, **kwargs)
 
-            auth_header = get_authorization_header(request)
+            auth_header = get_authorization_header(request.META)
+            logger.info("request has auth header '%s'", auth_header)
             if auth_header is None:
                 return error_response(
                     status=401, message="Missing authorization header"
                 )
 
             token = get_token_from_authorization_header(auth_header)
+            logger.info("request has token '%s'", token)
 
             try:
                 claims = decode(
@@ -98,6 +99,8 @@ def get_token_from_authorization_header(authorization_header):
     """
     >>> get_token_from_authorization_header('Bearer: foo')
     'foo'
+    >>> get_token_from_authorization_header('  bearer:      bar')
+    'bar'
     >>> get_token_from_authorization_header('Bearer:') is None
     True
     >>> get_token_from_authorization_header('foo') is None

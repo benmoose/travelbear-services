@@ -11,4 +11,4 @@ def request_factory():
 
 def test_get_authorization_header(request_factory):
     request = request_factory.get("/", HTTP_AUTHORIZATION="Bearer: foo")
-    assert get_authorization_header(request) == "Bearer: foo"
+    assert get_authorization_header(request.META) == "Bearer: foo"
