@@ -44,7 +44,6 @@ def require_jwt_auth(_func=None, *, public_key=None):
                 )
 
             token = get_token_from_authorization_header(auth_header)
-            logger.info("request has token '%s'", token)
 
             try:
                 claims = decode(

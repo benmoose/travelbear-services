@@ -9,6 +9,12 @@ class Trip:
     __slots__ = ("trip_id", "title", "description", "tags", "locations")
 
     @classmethod
+    def from_dict(cls, data):
+        data_copy = data.copy()
+        data_copy["description"] = data_copy.get("description", "")
+        return cls._from_dict(data_copy)
+
+    @classmethod
     def from_db_model_and_locations(cls, db_model, locations):
         trip = cls.from_db_model(db_model)
         trip.locations = [Location.from_db_model(location) for location in locations]
