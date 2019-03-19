@@ -1,8 +1,8 @@
 #!/bin/bash
 
 function start_production () {
-    gunicorn --pythonpath travelbear \
-        django_conf.wsgi -w 4 -b 0.0.0.0:8000 --chdir=/usr/src/app --log-file -
+    gunicorn --pythonpath /usr/src/app/travelbear \
+        django_conf.wsgi -w 2 -b 0.0.0.0:8000
 }
 
 start_production
