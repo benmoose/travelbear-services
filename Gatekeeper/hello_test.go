@@ -8,4 +8,3 @@ func TestHello(t *testing.T) {
 		t.Errorf("Hello() = %q, but expected %q", got, want)
 	}
 }
-
