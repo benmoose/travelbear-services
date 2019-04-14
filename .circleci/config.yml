@@ -14,24 +14,37 @@ jobs:
     - setup_remote_docker
     - run:
         name: Build images
-        working_directory: ~/srv/travelbear
+        working_directory: ~/srv/Travelbear
         command: |
           docker-compose build
     - run:
         name: Check code style
-        working_directory: ~/srv/travelbear
+        working_directory: ~/srv/Travelbear
         command: |
           docker-compose run --rm --no-deps server \
             sh -c "black --check . && isort -rc -q --check-only travelbear"
     - run:
         name: Run tests
-        working_directory: ~/srv/travelbear
+        working_directory: ~/srv/Travelbear
         command: |
           docker-compose run --rm -e stack=test server \
             pytest
 
+  gatekeeper_test:
+    working_directory: ~/srv
+    docker:
+    - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Run tests
+          working_directory: ~/srv/Gatekeeper
+          command: go test
+
 workflows:
   version: 2
-  travelbear:
+  test_services:
     jobs:
     - travelbear_test
+    - gatekeeper_test
