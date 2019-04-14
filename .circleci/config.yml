@@ -46,7 +46,7 @@ jobs:
       - run:
           name: Run tests
           working_directory: ~/srv/Gatekeeper
-          command: go test
+          command: go test ./...
 
 workflows:
   version: 2
