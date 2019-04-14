@@ -1,3 +1,3 @@
-module travelbear.com/gatekeeper
+module Gatekeeper
 
 go 1.12
