@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker-compose run --entrypoint go gatekeeper test ./...
