@@ -38,6 +38,12 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Lint code
+          working_directory: ~/srv/Gatekeeper
+          command: |
+            [[ -z "$(gofmt -l .)" ]] \
+              && (echo "Ok" && exit 0) || (echo "Code not formatted" && exit 1)
+      - run:
           name: Run tests
           working_directory: ~/srv/Gatekeeper
           command: go test
