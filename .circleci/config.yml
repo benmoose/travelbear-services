@@ -1,56 +1,108 @@
-# Python CircleCI 2.0 configuration file
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-
-version: 2
+version: 2.1
 
 jobs:
-  # Run tests for the Travelbear service
   travelbear_test:
-    working_directory: ~/srv
+    working_directory: ~/services
     docker:
-    - image: circleci/python:3.7
+      - image: circleci/python:3.7
     steps:
-    - checkout
-    - setup_remote_docker
-    - run:
-        name: Build images
-        working_directory: ~/srv/Travelbear
-        command: |
-          docker-compose build
-    - run:
-        name: Check code style
-        working_directory: ~/srv/Travelbear
-        command: |
-          docker-compose run --rm --no-deps server \
-            sh -c "black --check . && isort -rc -q --check-only travelbear"
-    - run:
-        name: Run tests
-        working_directory: ~/srv/Travelbear
-        command: |
-          docker-compose run --rm -e stack=test server \
-            pytest
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build images
+          working_directory: ~/services/Travelbear
+          command: |
+            docker-compose build
+      - run:
+          name: Check code style
+          working_directory: ~/services/Travelbear
+          command: |
+            docker-compose run --rm --no-deps server \
+              sh -c "black --check . && isort -rc -q --check-only travelbear"
+      - run:
+          name: Run tests
+          working_directory: ~/services/Travelbear
+          command: |
+            docker-compose run --rm -e stack=test server \
+              pytest
+          
+  travelbear_push:
+    working_directory: ~/services
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install AWS CLI
+          command: |
+            export PIP=$(which pip pip3 | head -1)
+            if [[ -n $PIP ]]; then
+              if which sudo > /dev/null; then
+                sudo $PIP install awscli --upgrade
+              else
+                # This installs the AWS CLI to ~/.local/bin. Make sure that ~/.local/bin is in your $PATH.
+                $PIP install aws --upgrade --user
+              fi
+            elif [[ $(which unzip curl | wc -l) -eq 2 ]]; then
+              cd
+              curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+              unzip awscli-bundle.zip
+              if which sudo > /dev/null; then
+                sudo ~/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+              else
+                # This installs the AWS CLI to the default location (~/.local/lib/aws) and create a symbolic link (symlink) at ~/bin/aws. Make sure that ~/bin is in your $PATH.
+                awscli-bundle/install -b ~/bin/aws
+              fi
+              rm -rf awscli-bundle*
+              cd -
+            else
+              echo "Unable to install AWS CLI. Please install pip."
+              exit 1
+            fi
+      - run:
+          name: AWS ECR Auth Setup
+          working_directory: ~/services/Travelbear
+          command: |
+            login="$(aws ecr get-login --no-include-email --region eu-west-1)"
+            ${login}
+      - run:
+          name: Push Images
+          working_directory: ~/services/Travelbear
+          command: ./push-images.sh
 
   gatekeeper_test:
-    working_directory: ~/srv
+    working_directory: ~/services
     docker:
-    - image: circleci/golang:1.12
+      - image: circleci/golang:1.12
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: Lint code
-          working_directory: ~/srv/Gatekeeper
+          working_directory: ~/services/Gatekeeper
           command: |
             [[ -z "$(gofmt -l .)" ]] \
               && (echo "Ok" && exit 0) || (echo "Code not formatted" && exit 1)
       - run:
           name: Run tests
-          working_directory: ~/srv/Gatekeeper
+          working_directory: ~/services/Gatekeeper
           command: go test ./...
 
 workflows:
   version: 2
-  test_services:
+  gatekeeper_pipeline:
     jobs:
-    - travelbear_test
-    - gatekeeper_test
+      - gatekeeper_test
+  travelbear_pipeline:
+    jobs:
+      - travelbear_test
+      - travelbear_push:
+          requires:
+            - travelbear_test
+          filters:
+            branches:
+              only:
+                - master
+                - production
+
