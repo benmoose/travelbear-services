@@ -32,6 +32,4 @@ echo "Done"
 for TAG in ${GIT_TAG} ${LATEST_TAG}
 do
     docker push ""${ECR_REPO_URL}":${TAG}"
-    PUSH_STATUS=$?
-    [[ "$PUSH_STATUS" != "0" ]] && echo "Failed to push to ECR" && exit 1
 done
