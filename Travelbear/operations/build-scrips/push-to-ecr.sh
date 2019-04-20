@@ -9,10 +9,10 @@ if [[ -z "${BRANCH_NAME}" || -z "${ECR_URL}" ]]; then
 fi
 
 IMAGE_NAME=$1
-CONTEXT_DIR=$2
+DOCKERFILE_PATH=$2
 
 if [[ "$#" != "2" ]]; then
-    echo "Usage: push-to-ecr.sh image-name context-dir"
+    echo "Usage: push-to-ecr.sh image-name dockerfile-path"
     exit 1
 fi
 
@@ -25,7 +25,7 @@ GIT_TAG=""${IMAGE_NAME}"."${BRANCH_NAME}"."$(git rev-list HEAD | head -n 1)""
 LATEST_TAG=""${IMAGE_NAME}"."${BRANCH_NAME}".latest"
 
 echo -n "Building "${IMAGE_NAME}"... "
-IMAGE_ID=$(docker build -qt ""${ECR_REPO_URL}":"${GIT_TAG}"" ${CONTEXT_DIR})
+IMAGE_ID=$(docker build -qt ""${ECR_REPO_URL}":"${GIT_TAG}"" -f ${DOCKERFILE_PATH} .)
 docker tag ${IMAGE_ID} ""${ECR_REPO_URL}":${LATEST_TAG}"
 echo "Done"
 

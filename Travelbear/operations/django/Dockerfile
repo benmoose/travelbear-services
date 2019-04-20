@@ -18,4 +18,4 @@ RUN pip install -r /wheels/requirements/requirements.test.txt -f /wheels \
 WORKDIR /usr/src/app
 COPY . .
 
-EXPOSE 8000
+ENTRYPOINT [ "operations/django/entrypoint.sh" ]

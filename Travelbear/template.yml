@@ -1,0 +1,242 @@
+Parameters:
+  ParameterGroup:
+    Type: String
+    Default: staging
+    Description: Which environment should this stack be?
+    AllowedValues:
+      - staging
+      - production
+
+Mappings:
+  ParameterGroups:
+    staging:
+      Environment: staging
+      DjangoImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:django.master.latest
+      NginxImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:nginx.master.latest
+
+    production:
+      Environment: production
+      DjangoImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:django.production.latest
+      NginxImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:nginx.production.latest
+
+  Default:
+    eu-west-1:
+      VPCID: vpc-00798bba3da114258
+      PublicSubnetZoneA: subnet-0873f3d8ea0164625
+      PublicSubnetZoneB: subnet-0df34cd96174ac9e7
+      PrivateSubnetZoneA: subnet-03d70286865dce575
+      PrivateSubnetZoneB: subnet-0a2de786929184e25
+      CertificateArn: arn:aws:acm:eu-west-1:470163659234:certificate/ae7c3f64-6672-4bda-a15c-a44a74426dd4
+
+Resources:
+  # Load balancer
+
+  TravelbearLoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Name: !Sub
+        - ${Environment}-TravelbearLB
+        - { Environment: !FindInMap [ParameterGroups, !Ref ParameterGroup, Environment] }
+      Scheme: internet-facing
+      Subnets:
+        - !FindInMap [Default, !Ref "AWS::Region", PublicSubnetZoneA]
+        - !FindInMap [Default, !Ref "AWS::Region", PublicSubnetZoneB]
+      SecurityGroups:
+        - !Ref "TravelbearALBSecurityGroup"
+
+  TravelbearTargetGroup:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    DependsOn: TravelbearLoadBalancer
+    Properties:
+      Name: !Sub
+        - ${Environment}-TravelbearTG
+        - { Environment: !FindInMap [ParameterGroups, !Ref ParameterGroup, Environment] }
+      HealthCheckPath: "/health/"
+      Matcher:
+        HttpCode: 200-399
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !FindInMap [Default, !Ref "AWS::Region", VPCID]
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: "60"
+
+  TravelbearListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TravelbearTargetGroup
+      LoadBalancerArn: !Ref TravelbearLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !FindInMap [Default, !Ref "AWS::Region", CertificateArn]
+
+  # Logs
+
+  TravelbearLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: !Join ["/", [/ecs, !Ref "AWS::StackName"]]
+      RetentionInDays: 30
+
+  # Fargate
+
+  TravelbearTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      Cpu: "1024"
+      Memory: "2048"
+      ExecutionRoleArn: !GetAtt "TravelbearExecutionRole.Arn"
+      TaskRoleArn: !GetAtt "TravelbearTaskRole.Arn"
+      Family: !Sub
+        - "${Environment}-TravelbearTaskDefinition"
+        - { Environment: !FindInMap [ParameterGroups, !Ref ParameterGroup, Environment] }
+      RequiresCompatibilities:
+        - "FARGATE"
+      NetworkMode: "awsvpc"
+      Volumes:
+        - Name: "shared-mount"
+      ContainerDefinitions:
+        - Name: nginx
+          Image: !FindInMap [ParameterGroups, !Ref ParameterGroup, NginxImage]
+          Cpu: 128
+          MemoryReservation: 256
+          Environment: []
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref "TravelbearLogGroup"
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: "nginx"
+          MountPoints:
+            - SourceVolume: "shared-mount"
+              ContainerPath: /var/tmp/shared-mount
+          Essential: true
+
+        - Name: django
+          Image: !FindInMap [ParameterGroups, !Ref ParameterGroup, DjangoImage]
+          Cpu: 512
+          MemoryReservation: 1024
+          Environment:
+            - Name: DEPLOYMENT_ENVIRONMENT
+              Value: !FindInMap [ParameterGroups, !Ref ParameterGroup, Environment]
+            - Name: DJANGO_SETTINGS_MODULE
+              Value: "django_conf.settings"
+            - Name: SECRET_KEY
+              Value: ")*m#$_gj2*cUv]Y4xLei(e&^)kr4lzv=vCF/$Ur~3dyv_2rpi%"
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref "TravelbearLogGroup"
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: "django"
+          MountPoints:
+            - SourceVolume: "shared-mount"
+              ContainerPath: /var/tmp/shared-mount
+          Essential: true
+
+  TravelbearService:
+    Type: "AWS::ECS::Service"
+    DependsOn: TravelbearListener
+    Properties:
+      ServiceName: !Sub
+        - "Travelbear-${Environment}"
+        - { Environment: !FindInMap [ParameterGroups, !Ref ParameterGroup, Environment] }
+      Cluster: !Ref "TravelbearCluster"
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DesiredCount: 1
+      LaunchType: FARGATE
+      TaskDefinition: !Ref "TravelbearTaskDefinition"
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: "DISABLED"
+          SecurityGroups:
+            - !Ref "TravelbearTaskSecurityGroup"
+          Subnets:
+            - !FindInMap [Default, !Ref "AWS::Region", PrivateSubnetZoneA]
+            - !FindInMap [Default, !Ref "AWS::Region", PrivateSubnetZoneB]
+      LoadBalancers:
+        - TargetGroupArn: !Ref "TravelbearTargetGroup"
+          ContainerName: nginx
+          ContainerPort: 80
+
+  TravelbearCluster:
+    Type: "AWS::ECS::Cluster"
+    Properties:
+      ClusterName: !Ref "AWS::StackName"
+
+  # IAM
+
+  TravelbearExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ["sts:AssumeRole"]
+      Policies:
+        -
+          PolicyName: TravelbearExecutionRolePolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+
+  TravelbearTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ["sts:AssumeRole"]
+      Policies:
+        - PolicyName: SSM
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ssm:GetParameter*"
+                Resource: "*"
+
+  # Security Groups
+
+  TravelbearALBSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      VpcId: !FindInMap [Default, !Ref "AWS::Region", VPCID]
+      GroupDescription: Enable HTTPS access to ALB
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+
+  TravelbearTaskSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      VpcId: !FindInMap [Default, !Ref "AWS::Region", VPCID]
+      GroupDescription: Enable HTTP access from ALB
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !Ref "TravelbearALBSecurityGroup"
