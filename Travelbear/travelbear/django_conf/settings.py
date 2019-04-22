@@ -16,20 +16,18 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-STACK = os.getenv("stack")
+ENVIRONMENT = os.getenv("ENVIRONMENT")
 
-IS_PROD_ENVIRONMENT = STACK == "production"
-IS_DEV_ENVIRONMENT = STACK == "development"
-IS_TEST_ENVIRONMENT = STACK == "test"
+IS_PROD_ENVIRONMENT = ENVIRONMENT == "production"
+IS_DEV_ENVIRONMENT = ENVIRONMENT == "development"
+IS_TEST_ENVIRONMENT = ENVIRONMENT == "test"
 
 
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-SECRET_KEY = os.getenv(
-    "SECRET_KEY", "DEVKEY^0pu&rp0el9zzx*xb39bu=vo7qlgyx3m%&dariuwa3o_"
-)
+SECRET_KEY = os.getenv("SECRET_KEY", "TEST_SECRET_KEY")
 API_AUDIENCE_NAME = os.getenv("AUTH0_API_AUDIENCE", "https://travelbear.io/api")
 DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
 

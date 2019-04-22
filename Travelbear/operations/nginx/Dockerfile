@@ -1,3 +1,3 @@
 FROM nginx:alpine
 
-ADD nginx.conf /etc/nginx/nginx.conf
+ADD operations/nginx/nginx.conf /etc/nginx/nginx.conf

@@ -3,7 +3,7 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /wheels
 
-COPY requirements*.txt ./requirements/
+COPY requirements*.txt requirements/
 RUN pip wheel -r ./requirements/requirements.test.txt
 
 FROM python:3.7-slim
@@ -18,4 +18,4 @@ RUN pip install -r /wheels/requirements/requirements.test.txt -f /wheels \
 WORKDIR /usr/src/app
 COPY . .
 
-EXPOSE 8000
+ENTRYPOINT [ "operations/django/entrypoint.sh" ]

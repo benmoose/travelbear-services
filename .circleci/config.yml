@@ -2,32 +2,37 @@ version: 2.1
 
 jobs:
   travelbear_test:
-    working_directory: ~/services
+    working_directory: ~/travelbear
     docker:
       - image: circleci/python:3.7
     steps:
       - checkout
       - setup_remote_docker
       - run:
+          working_directory: ~/travelbear/Travelbear
           name: Build images
-          working_directory: ~/services/Travelbear
           command: |
             docker-compose build
       - run:
           name: Check code style
-          working_directory: ~/services/Travelbear
+          working_directory: ~/travelbear/Travelbear
           command: |
-            docker-compose run --rm --no-deps server \
-              sh -c "black --check . && isort -rc -q --check-only travelbear"
+            docker-compose run \
+              --no-deps \
+              --entrypoint "sh -c" \
+              -e ENVIRONMENT=test \
+              server "black --check . && isort -rc -q --check-only travelbear"
       - run:
           name: Run tests
-          working_directory: ~/services/Travelbear
+          working_directory: ~/travelbear/Travelbear
           command: |
-            docker-compose run --rm -e stack=test server \
-              pytest
-          
+            docker-compose run \
+              --entrypoint pytest \
+              -e ENVIRONMENT=test \
+              server
+
   travelbear_push:
-    working_directory: ~/services
+    working_directory: ~/travelbear
     docker:
       - image: circleci/python:3.7
     steps:
@@ -61,18 +66,18 @@ jobs:
               exit 1
             fi
       - run:
-          name: AWS ECR Auth Setup
-          working_directory: ~/services/Travelbear
+          name: AWS ECR auth setup
+          working_directory: ~/travelbear/Travelbear
           command: |
             login="$(aws ecr get-login --no-include-email --region eu-west-1)"
             ${login}
       - run:
-          name: Push Images
-          working_directory: ~/services/Travelbear
+          name: Push images
+          working_directory: ~/travelbear/Travelbear
           command: ./push-images.sh
 
   gatekeeper_test:
-    working_directory: ~/services
+    working_directory: ~/travelbear
     docker:
       - image: circleci/golang:1.12
     steps:
@@ -80,13 +85,13 @@ jobs:
       - setup_remote_docker
       - run:
           name: Lint code
-          working_directory: ~/services/Gatekeeper
+          working_directory: ~/travelbear/Gatekeeper
           command: |
             [[ -z "$(gofmt -l .)" ]] \
               && (echo "Ok" && exit 0) || (echo "Code not formatted" && exit 1)
       - run:
           name: Run tests
-          working_directory: ~/services/Gatekeeper
+          working_directory: ~/travelbear/Gatekeeper
           command: go test ./...
 
 workflows:
