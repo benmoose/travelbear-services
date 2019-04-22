@@ -3,7 +3,7 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /wheels
 
-COPY requirements*.txt ./requirements/
+COPY requirements*.txt requirements/
 RUN pip wheel -r ./requirements/requirements.test.txt
 
 FROM python:3.7-slim
