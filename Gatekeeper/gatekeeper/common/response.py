@@ -1,10 +1,10 @@
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 
 HTTP_200_OK = 200
 HTTP_400_BAD_REQUEST = 400
 
 
-def success_response(data=None, status=HTTP_200_OK) -> JsonResponse:
+def success_response(data=None, status=HTTP_200_OK) -> HttpResponse:
     """
     >>> isinstance(success_response(), JsonResponse)
     True
@@ -18,7 +18,7 @@ def success_response(data=None, status=HTTP_200_OK) -> JsonResponse:
     return JsonResponse(data=data, status=status, safe=False)
 
 
-def error_response(message: str = None, status=HTTP_400_BAD_REQUEST) -> JsonResponse:
+def error_response(message: str = None, status=HTTP_400_BAD_REQUEST) -> HttpResponse:
     """
     >>> isinstance(error_response(), JsonResponse)
     True
@@ -29,7 +29,5 @@ def error_response(message: str = None, status=HTTP_400_BAD_REQUEST) -> JsonResp
     >>> error_response(status=418).status_code
     418
     """
-    error_data = {
-        "message": message,
-    }
+    error_data = {"message": message}
     return JsonResponse(data=error_data, status=status)
