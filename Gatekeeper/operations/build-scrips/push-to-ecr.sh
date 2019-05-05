@@ -18,7 +18,7 @@ fi
 
 shift 2
 
-REPO_NAME="travelbear/Travelbear"
+REPO_NAME="travelbear/Gatekeeper"
 ECR_REPO_URL=""${ECR_URL}"/"${REPO_NAME}""
 
 GIT_TAG=""${IMAGE_NAME}"."${BRANCH_NAME}"."$(git rev-list HEAD | head -n 1)""
