@@ -2,4 +2,4 @@
 
 export ENVIRONMENT=test
 
-pytest
+pytest --pyargs "$@"
