@@ -11,22 +11,22 @@ Mappings:
   ParameterGroups:
     staging:
       Environment: staging
-      DjangoImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:django.master.latest
-      NginxImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:nginx.master.latest
+      DjangoImage: 470163659234.dkr.ecr.eu-west-2.amazonaws.com/travelbear/travelbear:django.master.latest
+      NginxImage: 470163659234.dkr.ecr.eu-west-2.amazonaws.com/travelbear/travelbear:nginx.master.latest
 
     production:
       Environment: production
-      DjangoImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:django.production.latest
-      NginxImage: 470163659234.dkr.ecr.eu-west-1.amazonaws.com/travelbear/travelbear:nginx.production.latest
+      DjangoImage: 470163659234.dkr.ecr.eu-west-2.amazonaws.com/travelbear/travelbear:django.production.latest
+      NginxImage: 470163659234.dkr.ecr.eu-west-2.amazonaws.com/travelbear/travelbear:nginx.production.latest
 
   Default:
-    eu-west-1:
-      VPCID: vpc-00798bba3da114258
-      PublicSubnetZoneA: subnet-0873f3d8ea0164625
-      PublicSubnetZoneB: subnet-0df34cd96174ac9e7
-      PrivateSubnetZoneA: subnet-03d70286865dce575
-      PrivateSubnetZoneB: subnet-0a2de786929184e25
-      CertificateArn: arn:aws:acm:eu-west-1:470163659234:certificate/ae7c3f64-6672-4bda-a15c-a44a74426dd4
+    eu-west-2:
+      VPCID: vpc-02513286d86107636
+      PublicSubnetZoneA: subnet-0f09939b60b8c2a77
+      PublicSubnetZoneB: subnet-0430bf6a6871f944f
+      PrivateSubnetZoneA: subnet-0cbf470e559041786
+      PrivateSubnetZoneB: subnet-0ed77f13647014010
+      CertificateArn: arn:aws:acm:eu-west-2:470163659234:certificate/edcbc8a5-1957-401f-9fe0-946ac56d83a1
 
 Resources:
   # Load balancer
@@ -128,6 +128,14 @@ Resources:
               Value: !FindInMap [ParameterGroups, !Ref ParameterGroup, Environment]
             - Name: DJANGO_SETTINGS_MODULE
               Value: "django_conf.settings"
+            - Name: DB_HOST
+              Value: "travelbear-staging.ctkcgxqw3fxj.eu-west-2.rds.amazonaws.com"
+            - Name: DB_NAME
+              Value: "travelbear"
+            - Name: DB_USER
+              Value: "travelbear"
+            - Name: DB_PASSWORD
+              Value: "rx68e7uv7nuygzebzd"
             - Name: SECRET_KEY
               Value: ")*m#$_gj2*cUv]Y4xLei(e&^)kr4lzv=vCF/$Ur~3dyv_2rpi%"
           LogConfiguration:
@@ -173,6 +181,28 @@ Resources:
     Properties:
       ClusterName: !Ref "AWS::StackName"
 
+  # RDS
+
+  TravelbearDB:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      AutoMinorVersionUpgrade: true
+      DBInstanceClass: ""
+      DBInstanceIdentifier: !Sub
+        - "travelbear-${Environment}"
+        - { Environment: !FindInMap [ParameterGroups, !Ref ParameterGroup, Environment] }
+      DBName: "travelbear"
+      DeletionProtection: true
+      Engine: "PostgreSQL"
+      EngineVersion: "11.1"
+      MasterUsername: "travelbear"
+      MasterUserPassword: "vfnau9ng8.k8cep462i.8bs2me7tz.y3piq752r"
+      MultiAZ: true
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - ""
+
+
   # IAM
 
   TravelbearExecutionRole:
@@ -180,10 +210,10 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: [ecs-tasks.amazonaws.com]
-          Action: ["sts:AssumeRole"]
+          - Effect: Allow
+            Principal:
+              Service: [ecs-tasks.amazonaws.com]
+            Action: ["sts:AssumeRole"]
       Policies:
         -
           PolicyName: TravelbearExecutionRolePolicy
@@ -204,10 +234,10 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: [ecs-tasks.amazonaws.com]
-          Action: ["sts:AssumeRole"]
+          - Effect: Allow
+            Principal:
+              Service: [ecs-tasks.amazonaws.com]
+            Action: ["sts:AssumeRole"]
       Policies:
         - PolicyName: SSM
           PolicyDocument:
@@ -236,7 +266,7 @@ Resources:
       VpcId: !FindInMap [Default, !Ref "AWS::Region", VPCID]
       GroupDescription: Enable HTTP access from ALB
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
-        SourceSecurityGroupId: !Ref "TravelbearALBSecurityGroup"
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref "TravelbearALBSecurityGroup"
