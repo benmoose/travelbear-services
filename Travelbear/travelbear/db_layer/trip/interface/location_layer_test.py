@@ -18,7 +18,6 @@ from .location_layer import (
     get_places_for_location,
     update_location,
 )
-from .move_layer import create_move
 from .trip_layer import create_trip
 
 

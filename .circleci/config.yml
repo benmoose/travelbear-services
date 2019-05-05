@@ -76,20 +76,29 @@ jobs:
   gatekeeper_test:
     working_directory: ~/services
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/python:3.7
     steps:
       - checkout
       - setup_remote_docker
       - run:
-          name: Lint code
+          working_directory: ~/services/Gatekeeper
+          name: Build images
+          command: |
+            docker-compose build
+      - run:
+          name: Check code style
           working_directory: ~/services/Gatekeeper
           command: |
-            [[ -z "$(gofmt -l .)" ]] \
-              && (echo "Ok" && exit 0) || (echo "Code not formatted" && exit 1)
+            docker-compose \
+              -f docker-compose.yml \
+              run --rm --no-deps --entrypoint ./run-fmt.sh server --check
       - run:
           name: Run tests
           working_directory: ~/services/Gatekeeper
-          command: go test ./...
+          command: |
+            docker-compose \
+              -f docker-compose.yml \
+              run --rm --entrypoint ./run-tests.sh server
 
 workflows:
   version: 2
