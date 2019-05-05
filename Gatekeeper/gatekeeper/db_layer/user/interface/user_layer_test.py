@@ -1,38 +1,34 @@
 import pytest
+from django.db import IntegrityError
 
 from ..models.user import User
-from .user_layer import get_or_create_user, set_user_as_active, set_user_as_inactive
+from .user_layer import create_user, set_user_as_active, set_user_as_inactive
 
 
-def assert_rows_in_db(expected=0):
+def assert_rows_in_db(expected):
     assert expected == len(User.objects.all())
 
 
-@pytest.mark.django_db
-def test_get_or_create_user():
+@pytest.fixture
+def user():
+    return create_user("test-user", "+447101010101")
+
+
+@pytest.mark.django_db(transaction=True)
+def test_create_user():
     assert_rows_in_db(0)
-    user_1, _ = get_or_create_user(
-        user_id="auth0-id",
-        full_name="ben hadfield",
-        short_name="ben",
-        picture="https://foo.com",
-    )
+    create_user("user-1", "+447000000000")
     assert_rows_in_db(1)
-    user_2, _ = get_or_create_user(user_id="auth0-id")
-    assert user_1 == user_2  # only checks PK
-    assert user_2.full_name == "ben hadfield"
-    assert user_2.short_name == "ben"
-    assert user_2.picture == "https://foo.com"
 
-    user_3, _ = get_or_create_user(user_id="auth0-id-1")
-    assert user_3 != user_1
-    assert_rows_in_db(2)
+    with pytest.raises(IntegrityError):
+        create_user("user-1", "+447111111111")
+
+    with pytest.raises(IntegrityError):
+        create_user("user-2", "+447000000000")
 
 
 @pytest.mark.django_db
-def test_set_user_as_inactive():
-    user, _ = get_or_create_user("foo")
-
+def test_set_user_as_inactive(user):
     assert user.is_active
     set_user_as_inactive(user)
     user.refresh_from_db()
@@ -45,8 +41,7 @@ def test_set_user_as_inactive():
 
 
 @pytest.mark.django_db
-def test_set_user_as_active():
-    user, _ = get_or_create_user("foo")
+def test_set_user_as_active(user):
     user.is_active = False
     user.save()
 
