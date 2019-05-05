@@ -2,3 +2,5 @@ env/
 venv/
 
 dev/
+
+.pytest_cache/

@@ -15,28 +15,30 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+ALLOWED_HOSTS = ["*"]
 
+
+# Settable from environment
 ENVIRONMENT = os.getenv("ENVIRONMENT")
+DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
+SECRET_KEY = os.getenv("SECRET_KEY", "TEST_SECRET_KEY")
+API_AUDIENCE_NAME = os.getenv("AUTH0_API_AUDIENCE", "https://travelbear.io/api")
+
+DB_NAME = os.getenv("DB_NAME", "postgres")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_MESSAGING_SERVICE_SID = os.getenv("TWILIO_MESSAGING_SERVICE_SID")
+
 
 IS_PROD_ENVIRONMENT = ENVIRONMENT == "production"
 IS_DEV_ENVIRONMENT = ENVIRONMENT == "development"
 IS_TEST_ENVIRONMENT = ENVIRONMENT == "test"
 
-
-# Settable from environment
-DB_NAME = os.getenv("DB_NAME", "postgres")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
-SECRET_KEY = os.getenv("SECRET_KEY", "TEST_SECRET_KEY")
-API_AUDIENCE_NAME = os.getenv("AUTH0_API_AUDIENCE", "https://travelbear.io/api")
-
-
 DEBUG = IS_DEV_ENVIRONMENT
-ALLOWED_HOSTS = ["*"]
-
-JWT_AUTH_PUBLIC_KEY = None
 
 
 # Application definition
