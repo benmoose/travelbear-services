@@ -16,20 +16,13 @@ def get_user_by_user_id(user_id: str) -> Optional[User]:
 
 
 def create_user(user_id, phone_number, full_name="", short_name="", picture=""):
-    pass
-
-
-def get_or_create_user(user_id, full_name="", short_name="", picture=""):
-    # short circuit need for transaction if only doing read
-    user = get_user_by_user_id(user_id)
-    if user is not None:
-        return user, False
-
-    with transaction.atomic():
-        return User.objects.get_or_create(
-            user_id=user_id,
-            defaults=dict(full_name=full_name, short_name=short_name, picture=picture),
-        )
+    return User.objects.create(
+        user_id=user_id,
+        phone_number=phone_number,
+        full_name=full_name,
+        short_name=short_name,
+        picture=picture,
+    )
 
 
 def set_user_as_inactive(user: User):
