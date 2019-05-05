@@ -15,6 +15,10 @@ def get_user_by_user_id(user_id: str) -> Optional[User]:
         return None
 
 
+def create_user(user_id, phone_number, full_name="", short_name="", picture=""):
+    pass
+
+
 def get_or_create_user(user_id, full_name="", short_name="", picture=""):
     # short circuit need for transaction if only doing read
     user = get_user_by_user_id(user_id)
