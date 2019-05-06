@@ -16,25 +16,61 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 ALLOWED_HOSTS = ["*"]
+ALLOWED_ENVIRONMENTS = ["production", "staging", "development", "test"]
 
 
-# Settable from environment
-ENVIRONMENT = os.getenv("ENVIRONMENT")
-DJANGO_LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
-SECRET_KEY = os.getenv("SECRET_KEY", "TEST_SECRET_KEY")
-API_AUDIENCE_NAME = os.getenv("AUTH0_API_AUDIENCE", "https://travelbear.io/api")
+ENVIRONMENT = None
+DJANGO_LOG_LEVEL = "INFO"
+SECRET_KEY = "dev.secret.key"
+AUTH0_API_AUDIENCE = "https://travelbear.io/api"
 
-DB_NAME = os.getenv("DB_NAME", "postgres")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
+DB_NAME = None
+DB_USER = None
+DB_PASSWORD = None
+DB_HOST = None
 
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_MESSAGING_SERVICE_SID = os.getenv("TWILIO_MESSAGING_SERVICE_SID")
+TWILIO_ACCOUNT_SID = None
+TWILIO_AUTH_TOKEN = None
+TWILIO_MESSAGING_SERVICE_SID = None
+
+
+SETTINGS_FROM_ENVIRONMENT = (
+    "DJANGO_LOG_LEVEL",
+
+    "ENVIRONMENT",
+    "SECRET_KEY",
+    "AUTH0_API_AUDIENCE",
+
+    "DB_NAME",
+    "DB_USER",
+    "DB_PASSWORD",
+    "DB_HOST",
+
+    "TWILIO_ACCOUNT_SID",
+    "TWILIO_AUTH_TOKEN",
+    "TWILIO_MESSAGING_SERVICE_SID",
+)
+
+for setting_name in SETTINGS_FROM_ENVIRONMENT:
+    env_value = os.getenv(setting_name)
+    if env_value is not None:
+        vars()[setting_name] = env_value
+
+
+for setting_name in SETTINGS_FROM_ENVIRONMENT:
+    if vars()[setting_name] is None:
+        raise EnvironmentError(f"{setting_name} is not set")
+
+
+if ENVIRONMENT not in ALLOWED_ENVIRONMENTS:
+    allowed_environments_string = ", ".join(ALLOWED_ENVIRONMENTS)
+    raise EnvironmentError(
+        f"invalid ENVIRONMENT {ENVIRONMENT}: must be one of {allowed_environments_string}"
+    )
 
 
 IS_PROD_ENVIRONMENT = ENVIRONMENT == "production"
+IS_STAGING_ENVIRONMENT = ENVIRONMENT == "staging"
 IS_DEV_ENVIRONMENT = ENVIRONMENT == "development"
 IS_TEST_ENVIRONMENT = ENVIRONMENT == "test"
 

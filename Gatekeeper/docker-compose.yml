@@ -13,8 +13,11 @@ services:
       - "shared-mount:/var/tmp/shared-mount"
     environment:
       - "DJANGO_SETTINGS_MODULE=django_conf.settings"
-      - "DB_HOST=db"
       - "ENVIRONMENT=development"
+      - "DB_NAME=postgres"
+      - "DB_USER=postgres"
+      - "DB_PASSWORD="
+      - "DB_HOST=db"
     depends_on:
       - db
 
