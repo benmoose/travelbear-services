@@ -15,4 +15,7 @@ Including another URLconf
 """
 from django.urls import include, path
 
-urlpatterns = [path("", include("api.urls"))]
+urlpatterns = [
+    path("", include("api.urls")),
+    path("webhooks/", include("webhooks.urls")),
+]
