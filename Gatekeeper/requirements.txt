@@ -5,3 +5,4 @@ django-cors-headers>=2.4.0,<2.99.99
 psycopg2-binary==2.7.6
 PyJWT>=1.6.4,<2
 gunicorn>=19.9.0,<19.99.99
+twilio>=6.26.3,<6.99.99
