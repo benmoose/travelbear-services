@@ -1,20 +1,28 @@
-import attr
+from common.model import data_model
 
 
-@attr.s(auto_attribs=True)
-class TwilioWebhookRequest:
+@data_model
+class TwilioSMSWebhookRequest:
+    account_sid: str
     message_sid: str
+    message_status: str
     sms_sid: str
+    sms_status: str
+    client_identity: str = ""
+    instance_sid: str = ""
     messaging_service_sid: str = ""
-    message_status: str = ""
     error_code: str = ""
 
     @classmethod
     def from_dict(cls, data):
         return cls(
-            message_sid=data["message_sid"],
-            sms_sid=data["sms_sid"],
-            messaging_service_sid=data.get("messaging_service_sid"),
-            message_status=data.get("message_status"),
-            error_code=data.get("error_code"),
+            account_sid=data["AccountSid"],
+            message_sid=data["MessageSid"],
+            message_status=data["MessageStatus"],
+            sms_sid=data["SmsSid"],
+            sms_status=data["SmsStatus"],
+            client_identity=data.get("ClientIdentity"),
+            instance_sid=data.get("InstanceSid"),
+            messaging_service_sid=data.get("MessagingServiceSid"),
+            error_code=data.get("ErrorCode"),
         )

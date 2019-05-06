@@ -17,5 +17,5 @@ from django.urls import include, path
 
 urlpatterns = [
     path("", include("api.urls")),
-    path("webhooks/", include("webhooks.urls")),
+    path("webhook/", include("webhook.urls")),
 ]
