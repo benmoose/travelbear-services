@@ -11,12 +11,12 @@ mkdir -p /var/tmp/shared-mount
 exec gunicorn -w 1 \
     --threads 1 \
     --timeout 240 \
-    --name travelbear \
+    --name gatekeeper \
     --log-level info \
     --pid /var/run/app.pid \
     --bind unix:/var/tmp/shared-mount/gunicorn.sock \
     --error-logfile - \
     --access-logfile - \
     --capture-output \
-    --chdir travelbear \
+    --chdir gatekeeper \
     "django_conf.wsgi:application"
