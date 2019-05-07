@@ -8,10 +8,10 @@ class TwilioSMSWebhookRequest:
     message_status: str
     sms_sid: str
     sms_status: str
-    client_identity: str = ""
-    instance_sid: str = ""
-    messaging_service_sid: str = ""
-    error_code: str = ""
+    client_identity: str = None
+    instance_sid: str = None
+    messaging_service_sid: str = None
+    error_code: str = None
 
     @classmethod
     def from_dict(cls, data):

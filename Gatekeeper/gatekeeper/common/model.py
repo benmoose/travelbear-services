@@ -6,6 +6,7 @@ def data_model(cls):
     Simple wrapper around `attrs`.
 
     All data model attributes require PEP 526 type annotations.
+    Set default value to `None` if field is optional.
 
     Annotations are checked after instantiation and a TypeError is raised if there is
     a type mismatch.
@@ -30,10 +31,14 @@ def validate(self, attributes):
 
 
 def validate_attribute(attribute, value):
+    # attributes with None defaults are optional so skip type check if no value provided
+    if attribute.default is None and value is None:
+        return
+
     if not isinstance(value, attribute.type):
         raise TypeError(
-            f"expected type {attribute.type} for attribute '{attribute.name}', "
-            f"but received type {type(value)}"
+            f"expected type {attribute.type} for attribute '{attribute.name}' "
+            f"but got type {type(value)}"
         )
 
 

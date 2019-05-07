@@ -1,9 +1,10 @@
 from typing import Optional
+
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 
-from common.response import success_response, error_response
 from common.model import data_model
+from common.response import error_response, success_response
 
 
 @data_model

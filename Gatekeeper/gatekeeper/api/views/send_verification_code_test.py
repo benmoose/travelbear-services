@@ -15,10 +15,7 @@ def url():
     return reverse(send_verification_code)
 
 
-@pytest.mark.parametrize("request_data", [
-    {},
-    {"foo": "bar"},
-])
+@pytest.mark.parametrize("request_data", [{}, {"foo": "bar"}])
 def test_send_verification_code_bad_request(api_client, url, request_data):
     response = api_client.post(url, data=request_data)
     assert 400 == response.status_code
