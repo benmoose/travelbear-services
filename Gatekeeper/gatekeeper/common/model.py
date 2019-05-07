@@ -31,7 +31,7 @@ def validate(self, attributes):
 
 
 def validate_attribute(attribute, value):
-    # attributes with None defaults are optional so skip type check if no value provided
+    # if attribute.default is None then it's optional
     if attribute.default is None and value is None:
         return
 
@@ -43,6 +43,8 @@ def validate_attribute(attribute, value):
 
 
 def data_model_from_dict(cls, data: dict):
-    attribute_name = {attrib.name for attrib in attr.fields(cls)}
-    init_data = {k: v for k, v in data.items() if k in attribute_name and v is not None}
-    return cls(**init_data)
+    attribute_names = {attrib.name for attrib in attr.fields(cls)}
+    init_args = {
+        k: v for k, v in data.items() if k in attribute_names and v is not None
+    }
+    return cls(**init_args)
