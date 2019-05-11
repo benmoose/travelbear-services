@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from django.db import transaction
 
@@ -11,6 +12,17 @@ def create_verification_code(
     return VerificationCode.objects.create(
         phone_number=phone_number, code=code, expires_at=expiry_time
     )
+
+
+def get_active_verification_codes_for_phone_number(
+    phone_number: str, current_time: datetime
+) -> List[str]:
+    return [
+        verification_code.code
+        for verification_code in VerificationCode.objects.filter(
+            phone_number=phone_number, is_active=True, expires_at__gt=current_time
+        )
+    ]
 
 
 @transaction.atomic
