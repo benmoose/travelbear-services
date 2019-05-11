@@ -2,7 +2,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-Gatekeeper it Travelbear's authentication server.
+Gatekeeper is Travelbear's authentication server.
 
 #### Quickstart
 
@@ -19,4 +19,4 @@ To run a local version of the production app with Django served with gunicorn be
 $ docker-compose up
 ```
 
-The service listens on port 8000.
+The service listens at [http://localhost:8000](http://localhost:8000).
