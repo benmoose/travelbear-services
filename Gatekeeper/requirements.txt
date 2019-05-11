@@ -7,3 +7,4 @@ psycopg2-binary==2.7.6
 PyJWT>=1.6.4,<2
 gunicorn>=19.9.0,<19.99.99
 twilio>=6.26.3,<6.99.99
+phonenumberslite>=8.10.11,<8.99.99
