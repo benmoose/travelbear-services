@@ -15,9 +15,10 @@ def get_user_by_user_id(user_id: str) -> Optional[User]:
         return None
 
 
-def create_user(user_id, phone_number, full_name="", short_name="", picture=""):
+def create_user(
+    phone_number: str, full_name: str = "", short_name: str = "", picture: str = ""
+):
     return User.objects.create(
-        user_id=user_id,
         phone_number=phone_number,
         full_name=full_name,
         short_name=short_name,
