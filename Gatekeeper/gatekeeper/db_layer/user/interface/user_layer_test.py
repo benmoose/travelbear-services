@@ -17,8 +17,9 @@ def user():
 @pytest.mark.django_db(transaction=True)
 def test_create_user():
     assert_rows_in_db(0)
-    create_user("user-1", "+447000000000")
+    user = create_user("user-1", "+447000000000")
     assert_rows_in_db(1)
+    assert "+447000000000" == user.phone_number
 
     with pytest.raises(IntegrityError):
         create_user("user-1", "+447111111111")

@@ -3,7 +3,7 @@ from typing import Optional
 
 from django.db import transaction
 
-from ..models.user import User
+from ..models import User
 
 logger = logging.getLogger(__name__)
 
