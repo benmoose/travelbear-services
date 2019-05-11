@@ -19,7 +19,7 @@ class RequestData:
 def verify_phone_number(request):
     request_data = get_request_data(request.POST)
     if request_data is None:
-        return error_response("missing or invalid request body")
+        return error_response("missing or invalid data")
 
     current_time = get_current_utc_time()
     active_codes = get_active_verification_codes_for_phone_number(
@@ -29,9 +29,8 @@ def verify_phone_number(request):
     if not is_valid_code:
         return error_response("invalid verification code")
 
-    # user = create_user()
-
-    return success_response()
+    user = create_user(phone_number=request_data.phone_number)
+    return success_response({})
 
 
 def get_request_data(request_body: dict) -> Optional[RequestData]:
