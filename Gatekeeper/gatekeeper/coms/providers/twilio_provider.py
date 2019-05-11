@@ -27,7 +27,7 @@ class TwilioProvider(BaseProvider):
     def get_provider_id(self) -> str:
         return TWILIO_PROVIDER_ID
 
-    def send_sms(self, to_number: str, message: str, status_callback: str):
+    def send_sms(self, to_number: str, message: str, status_callback: str) -> bool:
         last_3_digits = to_number[-3:]
         result = self.twilio_client.messages.create(
             to=to_number,
@@ -42,3 +42,5 @@ class TwilioProvider(BaseProvider):
             logger.warning(
                 f"sending message to {last_3_digits} failed: {result.error_code} {result.error_message}"
             )
+
+        return result.status in TWILIO_MESSAGE_OK_STATES

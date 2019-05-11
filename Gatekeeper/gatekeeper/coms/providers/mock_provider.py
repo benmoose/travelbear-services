@@ -5,7 +5,6 @@ MOCK_PROVIDER_ID = "mock-provider"
 
 class MockProvider(BaseProvider):
     def __init__(self):
-        self.available_phone_numbers = []
         self.send_sms_attempts = []
 
     @classmethod
