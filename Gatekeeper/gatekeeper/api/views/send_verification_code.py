@@ -2,25 +2,25 @@ from datetime import datetime, timedelta
 from string import digits
 from typing import Optional, Tuple
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
-from django.urls import reverse
 from django.views.decorators.http import require_POST
 from phonenumbers import PhoneNumberFormat, format_number, parse
 
 from common.generate import generate_verification_code
 from common.model import data_model
+from common.parse import safe_parse_json
 from common.response import error_response, success_response
 from common.time import get_current_utc_time
 from coms.providers import get_communication_provider
-from db_layer.models import VerificationCode
-from db_layer.verification import create_verification_code, invalidate_verification_code
-from webhook.twilio_views.message_status import message_status_webhook
+from db.models import VerificationCode
+from db.verification import create_verification_code, invalidate_verification_code
 
 FIVE_MINUTES = 5 * 60
 
 VERIFICATION_CODE_LENGTH = 4
-VERIFICATION_CODE_POPULATION = digits
+VERIFICATION_CODE_ALPHABET = digits
 VERIFICATION_CODE_LIFETIME_SECONDS = FIVE_MINUTES
 
 
@@ -32,7 +32,7 @@ class RequestData:
 
 @require_POST
 def send_verification_code(request) -> HttpResponse:
-    request_data = get_request_data(request.POST)
+    request_data = get_request_data(request.body)
     if request_data is None:
         return error_response()
 
@@ -46,11 +46,11 @@ def send_verification_code(request) -> HttpResponse:
     )
 
     provider = get_communication_provider()
-    message_status_callback = reverse(message_status_webhook)
+    message_status_callback = settings.TWILIO_MESSAGE_STATUS_CALLBACK
     success, verification_code = send_verification_code_sms(
         provider=provider,
         phone_number=phone_number,
-        verification_code_population=VERIFICATION_CODE_POPULATION,
+        verification_code_population=VERIFICATION_CODE_ALPHABET,
         verification_code_length=VERIFICATION_CODE_LENGTH,
         verification_code_expiry_time=verification_code_expiry_time,
         callback=message_status_callback,
@@ -63,10 +63,10 @@ def send_verification_code(request) -> HttpResponse:
     return success_response({"phone_number": phone_number})
 
 
-def get_request_data(request_body: dict) -> Optional[RequestData]:
+def get_request_data(request_body: bytes) -> Optional[RequestData]:
     try:
-        return RequestData.from_dict(request_body)
-    except TypeError:
+        return RequestData.from_dict(safe_parse_json(request_body))
+    except Exception:
         return None
 
 

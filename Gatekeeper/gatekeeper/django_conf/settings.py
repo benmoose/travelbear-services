@@ -25,7 +25,10 @@ ALLOWED_ENVIRONMENTS = ["production", "staging", "development", "test"]
 ENVIRONMENT = None
 DJANGO_LOG_LEVEL = "INFO"
 SECRET_KEY = "dev.secret.key"
-AUTH0_API_AUDIENCE = "https://travelbear.io/api"
+AUTH_PUBLIC_KEY_PATH = ""
+AUTH_PRIVATE_KEY_PATH = ""
+AUTH_ACCESS_TOKEN_AUDIENCE = ""
+AUTH_ACCESS_TOKEN_ISSUER = ""
 
 DB_NAME = None
 DB_USER = None
@@ -35,6 +38,7 @@ DB_HOST = None
 TWILIO_ACCOUNT_SID = None
 TWILIO_AUTH_TOKEN = None
 TWILIO_MESSAGING_SERVICE_SID = None
+TWILIO_MESSAGE_STATUS_CALLBACK = None
 
 
 SETTINGS_FROM_ENVIRONMENT = (
@@ -42,7 +46,10 @@ SETTINGS_FROM_ENVIRONMENT = (
 
     "ENVIRONMENT",
     "SECRET_KEY",
-    "AUTH0_API_AUDIENCE",
+    "AUTH_PUBLIC_KEY_PATH",
+    "AUTH_PRIVATE_KEY_PATH",
+    "AUTH_ACCESS_TOKEN_AUDIENCE",
+    "AUTH_ACCESS_TOKEN_ISSUER",
 
     "DB_NAME",
     "DB_USER",
@@ -52,6 +59,7 @@ SETTINGS_FROM_ENVIRONMENT = (
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",
     "TWILIO_MESSAGING_SERVICE_SID",
+    "TWILIO_MESSAGE_STATUS_CALLBACK",
 )
 
 for setting_name in SETTINGS_FROM_ENVIRONMENT:
@@ -82,7 +90,7 @@ DEBUG = IS_DEV_ENVIRONMENT
 
 # Application definition
 
-PROJECT_APPS = ["db_layer"]
+PROJECT_APPS = ["db"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -194,6 +202,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = "/static/"
+
+
+# For tests that involve current time
+if IS_TEST_ENVIRONMENT:
+    from datetime import datetime
+
+    import pytz
+
+    TEST_CURRENT_TIME = datetime(2020, 1, 1, tzinfo=pytz.UTC)
 
 
 # CORS

@@ -91,7 +91,7 @@ jobs:
           command: |
             docker-compose \
               -f docker-compose.yml \
-              run --rm --no-deps --entrypoint ./run-fmt.sh server --check
+              run --rm --no-deps --entrypoint ./run-linter.sh server --check
       - run:
           name: Run tests
           working_directory: ~/services/Gatekeeper
